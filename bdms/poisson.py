@@ -62,6 +62,9 @@ class Process(ABC):
 
         Args:
             node: The node whose state is accessed to evaluate the process.
+
+        Returns:
+            The Poisson intensity at the node.
         """
         return self.λ(getattr(node, self.attr), node.t)
 
@@ -80,13 +83,16 @@ class Process(ABC):
 
     @abstractmethod
     def λ(self, x: Hashable, t: float) -> float:
-        r"""Evaluate the Poisson intensity :math:`\lambda(x, t)` for state :math:`x` at
+        r"""The Poisson intensity :math:`\lambda(x, t)` for state :math:`x` at
         time :math:`t`.
 
         Args:
             x: State to evaluate Poisson intensity at.
             t: Time to evaluate Poisson intensity at (``0.0`` corresponds to
                the root). This only has an effect if the process is time-inhomogeneous.
+
+        Returns:
+            The Poisson intensity :math:`\lambda(x, t)`.
         """
 
     @abstractmethod
@@ -103,6 +109,9 @@ class Process(ABC):
             x: State to evaluate Poisson intensity measure at.
             t: Start time.
             Δt: Time interval duration.
+
+        Returns:
+            The Poisson intensity measure :math:`\Lambda(x, t, \Delta t)`.
         """
 
     @abstractmethod
@@ -117,6 +126,9 @@ class Process(ABC):
             x: State.
             t: Start time of the interval.
             τ: Poisson intensity measure of the interval.
+
+        Returns:
+            The inverse Poisson intensity measure :math:`\Lambda_t^{-1}(x, t, \tau)`.
         """
 
     def waiting_time_rv(
@@ -137,6 +149,9 @@ class Process(ABC):
                   fresh, unpredictable entropy will be pulled from the OS. If an
                   ``int``, then it will be used to derive the initial state. If a
                   :py:class:`numpy.random.Generator`, then it will be used directly.
+
+        Returns:
+            Waiting time :math:`\Delta t`.
         """
         rng = np.random.default_rng(seed)
         return self.Λ_inv(x, t, rng.exponential(scale=1 / rate_multiplier))
@@ -160,6 +175,9 @@ class HomogeneousProcess(Process):
 
         Args:
             x: State to evaluate Poisson intensity at.
+
+        Returns:
+            The Poisson intensity :math:`\lambda(x)`.
         """
 
     # def __add__(self, other: Process) -> Process:
@@ -257,6 +275,9 @@ class InhomogeneousProcess(Process):
         Args:
             x: Attribute value to evaluate Poisson intensity at.
             t: Time at which to evaluate Poisson intensity.
+
+        Returns:
+            The Poisson intensity :math:`\lambda(x, t)`.
         """
 
     def λ(self, x: Hashable, t: float) -> float:

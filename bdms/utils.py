@@ -114,7 +114,7 @@ class RandomizedSet:
                   directly.
 
         Returns:
-            A randomly sampled item from the set.
+            The sampled item.
         """
         rng = np.random.default_rng(seed)
         return self._idx_to_item[rng.choice(len(self))]

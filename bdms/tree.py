@@ -423,6 +423,10 @@ class TreeNode(ete3.Tree):
                   fresh, unpredictable entropy will be pulled from the OS. If an
                   ``int``, then it will be used to derive the initial state. If a
                   :py:class:`numpy.random.Generator`, then it will be used directly.
+
+        Raises:
+            ValueError: If the tree has already been sampled below this node, or if
+                        neither ``n`` nor ``p`` is specified.
         """
         if self._sampled:
             raise ValueError(f"tree has already been sampled below node {self.name}")
@@ -443,12 +447,19 @@ class TreeNode(ete3.Tree):
     # NOTE: this could be generalized to take an ordered array-valued t,
     #       and made efficient via ordered traversal
     def slice(self, t: float, attr: str = "x") -> list[Any]:
-        r"""Return a list of attribute ``attr`` at time :math:`t` for all lineages alive
-        at that time.
-
+        r"""
         Args:
             t: Slice the tree at time :math:`t`.
             attr: Attribute to extract from slice.
+
+        Returns:
+            List of attribute ``attr`` values at time :math:`t` for all lineages alive
+            at that time.
+
+        Raises:
+            ValueError: If the tree has not evolved or has already been pruned below
+                        this node, or if the tree has not been sampled below this node,
+                        or if ``t`` is before the root time or after the tree end time.
         """
         if self._pruned:
             raise ValueError("Cannot slice a pruned tree")
@@ -475,7 +486,13 @@ class TreeNode(ete3.Tree):
 
     def prune(self) -> None:
         r"""Prune the tree to the subtree subtending the sampled leaves, removing
-        unobserved subtrees."""
+        unobserved subtrees.
+        
+        Raises:
+            ValueError: If the tree has not been sampled below this node, or if the
+                        tree has already been pruned below this node.
+            TreeError: If no leaves were sampled.
+        """
         if self._pruned:
             raise ValueError(f"tree has already been pruned below node {self.name}")
         if not self._sampled:
@@ -500,7 +517,9 @@ class TreeNode(ete3.Tree):
         r"""Remove unifurcating mutation event nodes, preserving branch length, and
         annotate mutation counts in child node ``n_mutations`` attribute.
 
-        The tree must have been pruned first with :py:meth:`prune`.
+        Raises:
+            ValueError: If the tree has not been pruned below this node with
+                        :py:meth:`prune`.
         """
         if not self._pruned:
             raise ValueError(f"tree has not been pruned below node {self.name}")
@@ -548,6 +567,9 @@ class TreeNode(ete3.Tree):
                    passed in ``kwargs``). If ``None``, then the scale is chosen
                    automatically.
             kwargs: Keyword arguments to pass to :py:meth:`ete3.TreeNode.render`.
+
+        Returns:
+            The return value of :py:meth:`ete3.TreeNode.render`.
         """
         if "tree_style" not in kwargs:
             kwargs["tree_style"] = ete3.TreeStyle()

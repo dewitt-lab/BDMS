@@ -58,7 +58,7 @@ extensions = [
 ]
 
 
-# -- Options for myst ----------------------------------------------
+# options for myst
 myst_heading_anchors = 3  # auto-generate 3 levels of heading anchors
 myst_enable_extensions = ["dollarmath"]
 nb_execution_mode = (
@@ -70,13 +70,15 @@ nb_merge_streams = True
 # show todos in output
 todo_include_todos = True
 
-# Mappings for sphinx.ext.intersphinx. Projects have to have Sphinx docs (.inv file).
+# mappings for sphinx.ext.intersphinx. Projects have to have Sphinx docs (.inv file).
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "ete3": ("http://etetoolkit.org/docs/latest/", None),
 }
+
+napoleon_use_rtype = False  # More compact, e.g. "Returns" vs. "Return type"
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
 autoclass_content = "both"  # Add __init__ doc (i.e. params) to class summaries

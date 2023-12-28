@@ -73,6 +73,19 @@ class Mutator(ABC):
                   :py:class:`numpy.random.Generator`, then it will be used directly.
         """
 
+    @abstractmethod
+    def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
+        r"""Probability of mutating from ``attr1`` to ``attr2``.
+
+        Args:
+            attr1: The initial attribute value.
+            attr2: The final attribute value.
+            log: If ``True``, return the log-probability.
+
+        Returns:
+            Mutation probability (or log probability).
+        """
+
     def __repr__(self) -> str:
         keyval_strs = (
             f"{key}={value}"
@@ -207,3 +220,9 @@ class DiscreteMutator(Mutator):
         ]
         new_value = rng.choice(states, p=transition_probs)
         setattr(node, self.attr, new_value)
+
+    def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
+        result = self.transition_matrix[self.state_space[attr1], self.state_space[attr2]]
+        if log:
+            result = np.log(result)
+        return result
