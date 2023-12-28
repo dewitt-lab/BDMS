@@ -32,7 +32,7 @@ import ete3
 from ete3.coretype.tree import TreeError
 from bdms import mutators, poisson, utils
 import numpy as np
-from typing import Any, Optional, Literal, Iterator, Self, Hashable
+from typing import Any, Literal, Iterator, Self, Hashable
 from collections.abc import Mapping
 import itertools
 from collections import defaultdict
@@ -85,7 +85,7 @@ class TreeNode(ete3.Tree):
         self.state_attr = state_attr
         """Name of the node attribute to store the state in."""
         setattr(self, state_attr, state)
-        self.event = None
+        self.event: str | None = None
         """Event at this node."""
         self.n_mutations = 0
         """Number of mutations on the branch above this node (zero unless the tree has
@@ -172,9 +172,9 @@ class TreeNode(ete3.Tree):
         birth_mutations: bool = False,
         min_survivors: int = 1,
         capacity: int = 1000,
-        capacity_method: Optional[Literal["birth", "death", "hard"]] = None,
+        capacity_method: Literal["birth", "death", "hard"] | None = None,
         init_population: int = 1,
-        seed: Optional[int | np.random.Generator] = None,
+        seed: int | np.random.Generator | None = None,
         verbose: bool = False,
     ) -> None:
         r"""Evolve for time :math:`\Delta t`.
@@ -409,9 +409,9 @@ class TreeNode(ete3.Tree):
 
     def sample_survivors(
         self,
-        n: Optional[int] = None,
-        p: Optional[float] = 1.0,
-        seed: Optional[int | np.random.Generator] = None,
+        n: int | None = None,
+        p: float | None = 1.0,
+        seed: int | np.random.Generator | None = None,
     ) -> None:
         """Choose :math:`n` survivor leaves from the tree, or each survivor leaf with
         probability :math:`p`, to mark as sampled (via the event attribute).
@@ -515,10 +515,10 @@ class TreeNode(ete3.Tree):
     def render(
         self,
         file_name: str,
-        color_by: Optional[int | float] = "state",
-        color_map: Optional[Mapping[Any, str]] = None,
+        color_by: int | float | None = "state",
+        color_map: Mapping[Any, str] | None = None,
         mode: Literal["c", "r"] = "r",
-        scale: Optional[float] = None,
+        scale: float | None = None,
         **kwargs: Any,
     ) -> Any:
         r"""A thin wrapper around :py:meth:`ete3.TreeNode.render` that adds some custom

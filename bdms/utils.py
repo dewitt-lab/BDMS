@@ -66,9 +66,8 @@ class RandomizedSet:
     """
 
     def __init__(self, items: Iterable[Hashable] = ()):
-        self._item_to_idx = {}
-        self._idx_to_item = {}
-        self._size = 0
+        self._item_to_idx: dict[Hashable, int] = {}
+        self._idx_to_item: list[Hashable] = []
         for item in items:
             self.add(item)
 
@@ -80,9 +79,8 @@ class RandomizedSet:
         """
         if item in self._item_to_idx:
             return
-        self._item_to_idx[item] = self._size
-        self._idx_to_item[self._size] = item
-        self._size += 1
+        self._item_to_idx[item] = len(self._idx_to_item)
+        self._idx_to_item.append(item)
 
     def remove(self, item: Hashable):
         r"""Remove an item from the set.
@@ -96,15 +94,13 @@ class RandomizedSet:
         if item not in self._item_to_idx:
             raise KeyError(item)
         # Swap the element with the last element
-        last_item, del_idx = (
-            self._idx_to_item[self._size - 1],
-            self._item_to_idx[item],
-        )
-        self._item_to_idx[last_item], self._idx_to_item[del_idx] = del_idx, last_item
+        last_item = self._idx_to_item[len(self) - 1]
+        del_idx = self._item_to_idx[item]
+        self._item_to_idx[last_item] = del_idx
+        self._idx_to_item[del_idx] = last_item
         # Remove the last element
         del self._item_to_idx[item]
-        del self._idx_to_item[self._size - 1]
-        self._size -= 1
+        del self._idx_to_item[len(self) - 1]
 
     def choice(self, seed: int | np.random.Generator | None = None) -> Hashable:
         r"""Randomly sample an item from the set.
@@ -121,18 +117,17 @@ class RandomizedSet:
             A randomly sampled item from the set.
         """
         rng = np.random.default_rng(seed)
-        random_idx = rng.choice(self._size)
-        return self._idx_to_item[random_idx]
+        return self._idx_to_item[rng.choice(len(self))]
 
     def __len__(self) -> int:
-        return self._size
+        return len(self._idx_to_item)
 
     def __iter__(self):
-        for idx in range(self._size):
+        for idx in range(len(self)):
             yield self._idx_to_item[idx]
 
     def __reversed__(self):
-        for idx in reversed(range(self._size)):
+        for idx in reversed(range(len(self))):
             yield self._idx_to_item[idx]
 
     def __repr__(self) -> str:

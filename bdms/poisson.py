@@ -26,7 +26,7 @@ b 0.3399...
 """
 
 from __future__ import annotations
-from typing import Any, Optional, Hashable, TYPE_CHECKING
+from typing import Any, Hashable, TYPE_CHECKING
 from collections.abc import Mapping, Sequence
 from abc import ABC, abstractmethod
 from scipy.integrate import quad
@@ -124,7 +124,7 @@ class Process(ABC):
         x: Hashable,
         t: float,
         rate_multiplier: float = 1.0,
-        seed: Optional[int | np.random.Generator] = None,
+        seed: int | np.random.Generator | None = None,
     ) -> float:
         r"""Sample the waiting time :math:`\Delta t` until the first event, given the
         process on state :math:`x` starting at time :math:`t`.
@@ -233,9 +233,9 @@ class InhomogeneousProcess(Process):
 
     Args:
         attr: The name of the :py:class:`bdms.TreeNode` attribute to access.
-        quad_kwargs: Optional quadrature convergence arguments passed to
+        quad_kwargs: Quadrature convergence arguments passed to
                      :py:func:`scipy.integrate.quad`.
-        root_kwargs: Optional root-finding convergence arguments passed to
+        root_kwargs: Root-finding convergence arguments passed to
                      :py:func:`scipy.optimize.root_scalar`.
     """
 
