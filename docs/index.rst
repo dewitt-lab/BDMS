@@ -16,6 +16,7 @@ All code is freely available at `<https://github.com/WSDeWitt/BDMS>`_.
    :caption: Tutorials
 
    notebooks/quickstart
+   notebooks/performance
 
 .. toctree::
    :maxdepth: 2
