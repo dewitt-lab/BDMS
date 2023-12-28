@@ -63,10 +63,10 @@ class Mutator(ABC):
         node: ete3.TreeNode,
         seed: int | np.random.Generator | None = None,
     ) -> None:
-        r"""Mutate a :py:class:`ete3.TreeNode` object in place.
+        r"""Mutate a :py:class:`bdms.TreeNode` object in place.
 
         Args:
-            node: A :py:class:`ete3.TreeNode` to mutate.
+            node: A :py:class:`bdms.TreeNode` to mutate.
             seed: A seed to initialize the random number generation. If ``None``, then
                   fresh, unpredictable entropy will be pulled from the OS. If an
                   ``int``, then it will be used to derive the initial state. If a

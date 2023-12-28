@@ -27,9 +27,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dynamic = [
-  "version"
-]
+dynamic = ["version"]
 dependencies = [
   "matplotlib",
   "numpy",
@@ -42,6 +40,7 @@ pyqt = [
   "pyqt5",
 ]
 dev = [
+  "hatch",
   "black[jupyter]",
   "docformatter",
   "flake8",
@@ -59,7 +58,7 @@ dev = [
 ]
 
 [tool.hatch.version]
-path = "bdms/__about__.py"
+path = "bdms/__init__.py"
 
 [project.urls]
 "Homepage" = "https://github.com/WSDeWitt/BDMS"

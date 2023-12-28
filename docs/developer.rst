@@ -42,3 +42,8 @@ Build docs locally (you can then see the generated documentation in ``docs/_buil
   make docs
 
 Docs are automatically deployed to github pages via a workflow on push to the main branch.
+
+Versioning
+----------
+
+We use `Hatch <https://hatch.pypa.io>`_ to manage versions.

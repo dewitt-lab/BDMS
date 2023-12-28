@@ -1,18 +1,25 @@
 Installation
 ############
 
-.. note::
-  see developer documentation for interim install info
-
 Pip
 ===
 
 .. todo::
-  setup pypi package
+  publish PyPi package
+
+
+.. code-block:: bash
+
+  pip install git+https://github.com/WSDeWitt/BDMS
 
 
 Conda
 =====
 
 .. todo::
-  setup Conda package
+  Publish Conda package
+
+Developer
+=========
+
+See :doc:`developer`.
