@@ -79,10 +79,9 @@ intersphinx_mapping = {
 }
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
-autoclass_content = "both"  # Add __init__ doc (ie. params) to class summaries
-html_show_sourcelink = (
-    False  # Remove 'view source code' from top of page (for html, not python)
-)
+autoclass_content = "both"  # Add __init__ doc (i.e. params) to class summaries
+html_show_sourcelink = True
+
 autodoc_inherit_docstrings = True  # If no class summary, inherit base class summary
 
 autodoc_default_options = {
@@ -106,10 +105,10 @@ html_theme = "furo"
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "show_toc_level": 2,
-    "repository_url": "https://github.com/WSDeWitt/BDMS",
-    "use_repository_button": True,  # add a "link to repository" button
-    "show_navbar_depth": 2,
+    # "show_toc_level": 2,
+    # "repository_url": "https://github.com/WSDeWitt/BDMS",
+    # "use_repository_button": True,  # add a "link to repository" button
+    # "show_navbar_depth": 2,
 }
 
 # The name of an image file (relative to this directory) to place at the top
