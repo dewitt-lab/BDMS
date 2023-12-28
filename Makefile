@@ -8,7 +8,12 @@ install-pyqt:
 
 test:
 	pytest
-	pytest --nbval notebooks/*
+
+doctest:
+	pytest --doctest-modules
+
+notebooks:
+	pytest --nbval notebooks
 
 format:
 	black .
@@ -20,4 +25,4 @@ lint:
 docs:
 	make -C docs html
 
-.PHONY: install test format lint docs
+.PHONY: install test notebooks format lint docs

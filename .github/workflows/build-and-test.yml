@@ -40,6 +40,12 @@ jobs:
 
       - name: Tests
         run: make test
+
+      - name: Doc tests
+        run: make doctest
+
+      - name: Test notebooks
+        run: make notebooks
     
       - name: Test docs build
         run: make docs

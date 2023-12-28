@@ -21,6 +21,10 @@ Run tests::
 
   make test
 
+Run doctests::
+
+  make doctest
+
 Test notebooks::
 
   make notebooks

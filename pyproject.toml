@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.metadata]
 # this allows dependencies to be specified with a url
-allow-direct-references = true
+# allow-direct-references = true
 
 [project]
 name = "BDMS"
@@ -59,7 +59,7 @@ dev = [
 ]
 
 [tool.hatch.version]
-path = "bdms/__init__.py"
+path = "bdms/__about__.py"
 
 [project.urls]
 "Homepage" = "https://github.com/WSDeWitt/BDMS"
