@@ -4,19 +4,46 @@ r"""Mutation effects generators
 Abstract base class for defining generic mutation effect generators (i.e.
 :math:`\mathcal{p}(x\mid x')`), with arbitrary :py:class:`ete3.TreeNode` attribute
 dependence. Some concrete child classes are included.
+
+These classes are used to define mutation effects for simulations with
+:py:class:`bdms.TreeNode.evolve`.
+
+Example:
+
+    >>> import bdms
+
+    Define a discrete mutation model.
+
+    >>> mutator = bdms.mutators.DiscreteMutator(
+    ...     state_space=("a", "b", "c"),
+    ...     transition_matrix=[[0.0, 0.5, 0.5],
+    ...                        [0.5, 0.0, 0.5],
+    ...                        [0.5, 0.5, 0.0]],
+    ... )
+
+    Mutate a node.
+
+    >>> node = bdms.TreeNode(state="a")
+    >>> mutator.mutate(node, seed=0)
+    >>> node.state
+    'c'
+
 """
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Optional
-from collections.abc import Iterable, Callable
+from typing import Any
+from collections.abc import Sequence, Callable, Hashable
 import numpy as np
 from scipy.stats import norm, gaussian_kde
 import ete3
 
 # NOTE: sphinx is currently unable to present this in condensed form when the
 #       sphinx_autodoc_typehints extension is enabled
-from numpy.typing import ArrayLike
+# TODO: use ArrayLike in various phenotype/time methods (current float types)
+#       once it is available in a stable release
+# from numpy.typing import ArrayLike
+from numpy.typing import NDArray
 
 
 class Mutator(ABC):
@@ -34,7 +61,7 @@ class Mutator(ABC):
     def mutate(
         self,
         node: ete3.TreeNode,
-        seed: Optional[int | np.random.Generator] = None,
+        seed: int | np.random.Generator | None = None,
     ) -> None:
         r"""Mutate a :py:class:`ete3.TreeNode` object in place.
 
@@ -78,7 +105,7 @@ class GaussianMutator(Mutator):
     def mutate(
         self,
         node: ete3.TreeNode,
-        seed: Optional[int | np.random.Generator] = None,
+        seed: int | np.random.Generator | None = None,
     ) -> None:
         new_value = getattr(node, self.attr) + self._distribution.rvs(random_state=seed)
         setattr(node, self.attr, new_value)
@@ -93,7 +120,7 @@ class KdeMutator(Mutator):
     attribute.
 
     Args:
-        dataset: Data to fit the KDE to.
+        data: Data to fit the KDE to.
         attr: Node attribute to mutate.
         bw_method: KDE bandwidth (see :py:class:`scipy.stats.gaussian_kde`).
         weights: Weights of data points (see :py:class:`scipy.stats.gaussian_kde`).
@@ -101,18 +128,18 @@ class KdeMutator(Mutator):
 
     def __init__(
         self,
-        dataset: ArrayLike,
+        data: NDArray[float.float64],
         attr: str = "state",
-        bw_method: Optional[str | float, Callable] = None,
-        weights: Optional[ArrayLike] = None,
+        bw_method: str | float | Callable | None = None,
+        weights: NDArray[float.float64] | None = None,
     ):
         super().__init__(attr=attr)
-        self._distribution = gaussian_kde(dataset, bw_method, weights)
+        self._distribution = gaussian_kde(data, bw_method, weights)
 
     def mutate(
         self,
         node: ete3.TreeNode,
-        seed: Optional[int | np.random.Generator] = None,
+        seed: int | np.random.Generator | None = None,
     ) -> None:
         new_value = (
             getattr(node, self.attr)
@@ -137,8 +164,8 @@ class DiscreteMutator(Mutator):
 
     def __init__(
         self,
-        state_space: Iterable,
-        transition_matrix: ArrayLike,
+        state_space: Sequence[Hashable],
+        transition_matrix: NDArray[float.float64],
         attr: str = "state",
     ):
         transition_matrix = np.asarray(transition_matrix, dtype=float)
@@ -152,10 +179,15 @@ class DiscreteMutator(Mutator):
                 f"Transition matrix shape {transition_matrix.shape} "
                 f"does not match state space size {state_space}"
             )
-        if np.any(transition_matrix < 0) or np.any(
-            np.abs(transition_matrix.sum(axis=1) - 1) > 1e-4
+        if (
+            np.any(transition_matrix < 0)
+            or np.any(transition_matrix > 1)
+            or not np.allclose(transition_matrix.sum(axis=1), 1)
         ):
-            raise ValueError("Transition matrix is not a valid stochastic matrix.")
+            raise ValueError(
+                f"Transition matrix {transition_matrix} is not a valid stochastic"
+                " matrix."
+            )
 
         super().__init__(attr=attr)
 
@@ -165,7 +197,7 @@ class DiscreteMutator(Mutator):
     def mutate(
         self,
         node: ete3.TreeNode,
-        seed: Optional[int | np.random.Generator] = None,
+        seed: int | np.random.Generator | None = None,
     ) -> None:
         rng = np.random.default_rng(seed)
 

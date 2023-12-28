@@ -1,13 +1,38 @@
 r"""Birth-death-mutation-sampling (BDMS) process simulation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Example:
+
+    >>> import bdms
+
+    Initialize a tree with a single root node.
+
+    >>> tree = bdms.Tree()
+    >>> print(tree)
+    <BLANKLINE>
+    --0
+
+    Evolve the tree for a one time unit with default parameters.
+
+    >>> tree.evolve(1.0, seed=0)
+    >>> print(tree)
+    <BLANKLINE>
+          /-2
+         |
+    -- /-|      /-6
+         |   /-|
+          \-|   \-7
+            |
+             \-5
+
 """
 
 from __future__ import annotations
 import ete3
 from ete3.coretype.tree import TreeError
-from bdms import bdms_utils, mutators, poisson
+from bdms import mutators, poisson, utils
 import numpy as np
-from typing import Any, Optional, Literal, Iterator, Self
+from typing import Any, Optional, Literal, Iterator, Self, Hashable
 from collections.abc import Mapping
 import itertools
 from collections import defaultdict
@@ -19,6 +44,8 @@ class TreeNode(ete3.Tree):
 
     Args:
         t: Time of this node.
+        state: State of this node.
+        state_attr: Name of the node attribute to store the state in.
         kwargs: Keyword arguments passed to :py:class:`ete3.TreeNode` initializer.
     """
 
@@ -42,6 +69,8 @@ class TreeNode(ete3.Tree):
     def __init__(
         self,
         t: float = 0,
+        state: Hashable = None,
+        state_attr: str = "state",
         **kwargs: Any,
     ) -> None:
         if "dist" not in kwargs:
@@ -52,6 +81,9 @@ class TreeNode(ete3.Tree):
         super().__init__(**kwargs)
         self.t = t
         """Time of the node."""
+        self.state_attr = state_attr
+        """Name of the node attribute to store the state in."""
+        setattr(self, state_attr, state)
         self.event = None
         """Event at this node."""
         self.n_mutations = 0
@@ -134,8 +166,8 @@ class TreeNode(ete3.Tree):
         t: float,
         birth_process: poisson.Process = poisson.ConstantProcess(1),
         death_process: poisson.Process = poisson.ConstantProcess(0),
-        mutation_process: poisson.Process = poisson.ConstantProcess(1),
-        mutator: mutators.Mutator = mutators.GaussianMutator(shift=0, scale=1),
+        mutation_process: poisson.Process = poisson.ConstantProcess(0),
+        mutator: mutators.Mutator = mutators.DiscreteMutator((None,), [[1]]),
         birth_mutations: bool = False,
         min_survivors: int = 1,
         capacity: int = 1000,
@@ -237,8 +269,8 @@ class TreeNode(ete3.Tree):
 
         # initialize population
         names_nodes_all = dict()
-        names_active = bdms_utils.RandomizedSet()
-        state_names_active = defaultdict(bdms_utils.RandomizedSet)
+        names_active = utils.RandomizedSet()
+        state_names_active = defaultdict(utils.RandomizedSet)
         total_birth_rate = 0.0
         total_death_rate = 0.0
         for _ in range(init_population):
@@ -262,17 +294,17 @@ class TreeNode(ete3.Tree):
             self._DEATH_EVENT: 1.0,
             self._MUTATION_EVENT: 1.0,
         }
-        while names_active.size > 0:
+        while len(names_active) > 0:
             if capacity_method == "birth":
                 rate_multipliers[self._BIRTH_EVENT] = (
                     total_death_rate / total_birth_rate
-                ) ** (names_active.size / capacity)
+                ) ** (len(names_active) / capacity)
             elif capacity_method == "death":
                 rate_multipliers[self._DEATH_EVENT] = (
                     total_birth_rate / total_death_rate
-                ) ** (names_active.size / capacity)
+                ) ** (len(names_active) / capacity)
             elif capacity_method == "hard":
-                if names_active.size > capacity:
+                if len(names_active) > capacity:
                     node_to_die_name = names_active.choice(rng)
                     node_to_die = names_nodes_all[node_to_die_name]
                     node_to_die.dist = current_time - node_to_die.up.t
@@ -285,7 +317,7 @@ class TreeNode(ete3.Tree):
                     total_birth_rate -= birth_process(node_to_die)
                     total_death_rate -= death_process(node_to_die)
             elif capacity_method is None:
-                if names_active.size > capacity:
+                if len(names_active) > capacity:
                     self._aborted_evolve_cleanup()
                     if verbose:
                         print()
@@ -298,7 +330,7 @@ class TreeNode(ete3.Tree):
                         state,
                         current_time,
                         rate_multiplier=rate_multipliers[event]
-                        * state_names_active[state].size,
+                        * len(state_names_active[state]),
                         seed=rng,
                     ),
                     event,
@@ -306,13 +338,11 @@ class TreeNode(ete3.Tree):
                 )
                 for event in processes
                 for state in state_names_active
-                if state_names_active[state].size > 0
+                if len(state_names_active[state]) > 0
             )
             Δt = min(waiting_time, end_time - current_time)
             current_time += Δt
             assert current_time <= end_time
-            # NOTE: maybe can avoid this loop, by updating times later
-            # (we now pass global time to waiting time function)
             if current_time < end_time:
                 event_node_name = state_names_active[state].choice(rng)
                 event_node = names_nodes_all[event_node_name]
@@ -339,19 +369,19 @@ class TreeNode(ete3.Tree):
                     state_names_active[getattr(new_node, state_attr)].add(new_node.name)
                     total_birth_rate += birth_process(new_node)
                     total_death_rate += death_process(new_node)
-                print_progress(current_time, names_active.size)
+                print_progress(current_time, len(names_active))
             else:
-                print_progress(current_time, names_active.size)
-                for node_name in names_active.as_list():
+                print_progress(current_time, len(names_active))
+                for node_name in reversed(names_active):
                     node = names_nodes_all[node_name]
                     node.t = current_time
                     node.dist = current_time - node.up.t
                     node.event = self._SURVIVAL_EVENT
                     names_active.remove(node_name)
                     state_names_active[getattr(node, state_attr)].remove(node.name)
-                assert names_active.size == 0
+                assert len(names_active) == 0
                 assert not any(
-                    state_names_active[state].size > 0 for state in state_names_active
+                    len(state_names_active[state]) > 0 for state in state_names_active
                 )
         if verbose:
             print()

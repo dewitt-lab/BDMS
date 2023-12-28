@@ -3,6 +3,26 @@ r"""Poisson point processes
 
 Abstract base classes for defining general Poisson point processes on
 :py:class:`bdms.TreeNode` state spaces. Several concrete child classes are included.
+
+These classes are used to define rate-driven processes---such as birth, death, and
+mutation---for simulations with :py:class:`bdms.TreeNode.evolve`.
+
+Example
+-------
+
+>>> import bdms
+
+Define a two-state process.
+
+>>> poisson_process = bdms.poisson.DiscreteProcess({"a": 1.0, "b": 2.0})
+
+Sample waiting times for each state.
+
+>>> for state in poisson_process.rates:  # doctest: +ELLIPSIS
+...     print(state, poisson_process.waiting_time_rv(state, 0.0, seed=0))
+a 0.6799...
+b 0.3399...
+
 """
 
 from __future__ import annotations
@@ -22,6 +42,7 @@ if TYPE_CHECKING:
 # TODO: use ArrayLike in various phenotype/time methods (current float types)
 #       once it is available in a stable release
 # from numpy.typing import ArrayLike
+from numpy.typing import NDArray
 
 
 class Process(ABC):
@@ -152,8 +173,13 @@ class HomogeneousProcess(Process):
         return self.λ_homogeneous(x) * Δt
 
     # @np.errstate(divide="ignore")
+    # NOTE: the above suppresses warnings, but is slow!
+    # We instead test for zero.
     def Λ_inv(self, x: Hashable, t: float, τ: float) -> float:
-        return τ / self.λ_homogeneous(x)
+        rate = self.λ_homogeneous(x)
+        if rate == 0:
+            return np.inf
+        return τ / rate
 
 
 class ConstantProcess(HomogeneousProcess):
@@ -167,9 +193,7 @@ class ConstantProcess(HomogeneousProcess):
         super().__init__()
         self.value = value
 
-    def λ_homogeneous(
-        self, x: Hashable | Sequence[Hashable] | np.ndarray[Hashable]
-    ) -> float:
+    def λ_homogeneous(self, x: Hashable | Sequence[Any] | NDArray[Any]) -> float:
         return self.value * np.ones_like(x)
 
 
@@ -178,19 +202,23 @@ class DiscreteProcess(HomogeneousProcess):
     d-1`.
 
     Args:
+        rates: Rates for each state.
         attr: The name of the :py:class:`bdms.TreeNode` attribute to access. This
               should take a discrete set of values.
-        rates: A list of rates for each state.
     """
 
-    def __init__(self, rates: Mapping[Hashable, float], attr: str = "state"):
+    def __init__(
+        self, rates: Mapping[Hashable, float] | Sequence[float], attr: str = "state"
+    ):
         super().__init__(attr=attr)
         self.rates = rates
 
     def λ_homogeneous(
         self, x: Hashable | Sequence[Hashable] | np.ndarray[Hashable]
     ) -> float:
-        if isinstance(x, Sequence) or isinstance(x, np.ndarray):
+        if (isinstance(x, Sequence) and not isinstance(x, str)) or isinstance(
+            x, np.ndarray
+        ):
             return np.array([self.rates[xi] for xi in x])
         return self.rates[x]
 
