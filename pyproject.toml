@@ -46,6 +46,7 @@ dev = [
   "flake8",
   "pytest",
   "nbval",
+  "pyright",
   "sphinx",
   "sphinx-argparse",
   "sphinx-autodoc-typehints",
@@ -64,3 +65,6 @@ path = "bdms/__init__.py"
 "Homepage" = "https://github.com/WSDeWitt/BDMS"
 "Bug Tracker" = "https://github.com/WSDeWitt/BDMS/issues"
 "Documentation" = "https://wsdewitt.github.io/BDMS"
+
+[tool.pyright]
+include = ["bdms", "tests"]
