@@ -37,6 +37,7 @@ from collections.abc import Mapping
 import itertools
 from collections import defaultdict
 import copy
+import math
 
 
 class TreeNode(ete3.Tree):
@@ -342,7 +343,6 @@ class TreeNode(ete3.Tree):
             )
             Δt = min(waiting_time, end_time - current_time)
             current_time += Δt
-            assert current_time <= end_time
             if current_time < end_time:
                 event_node_name = state_names_active[state].choice(rng)
                 event_node = names_nodes_all[event_node_name]
@@ -371,6 +371,13 @@ class TreeNode(ete3.Tree):
                     total_death_rate += death_process(new_node)
                 print_progress(current_time, len(names_active))
             else:
+                # deal with possible loss of significance
+                if current_time > end_time:
+                    # NOTE: math.isclose is much faster than np.isclose
+                    assert math.isclose(
+                        current_time, end_time
+                    ), f"{current_time=}, {end_time=}"
+                    current_time = end_time
                 print_progress(current_time, len(names_active))
                 for node_name in reversed(names_active):
                     node = names_nodes_all[node_name]
