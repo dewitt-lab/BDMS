@@ -222,7 +222,9 @@ class DiscreteMutator(Mutator):
         setattr(node, self.attr, new_value)
 
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
-        result = self.transition_matrix[self.state_space[attr1], self.state_space[attr2]]
+        result = self.transition_matrix[
+            self.state_space[attr1], self.state_space[attr2]
+        ]
         if log:
             result = np.log(result)
         return result

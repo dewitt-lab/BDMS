@@ -487,7 +487,7 @@ class TreeNode(ete3.Tree):
     def prune(self) -> None:
         r"""Prune the tree to the subtree subtending the sampled leaves, removing
         unobserved subtrees.
-        
+
         Raises:
             ValueError: If the tree has not been sampled below this node, or if the
                         tree has already been pruned below this node.

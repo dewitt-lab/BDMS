@@ -83,8 +83,8 @@ class Process(ABC):
 
     @abstractmethod
     def λ(self, x: Hashable, t: float) -> float:
-        r"""The Poisson intensity :math:`\lambda(x, t)` for state :math:`x` at
-        time :math:`t`.
+        r"""The Poisson intensity :math:`\lambda(x, t)` for state :math:`x` at time
+        :math:`t`.
 
         Args:
             x: State to evaluate Poisson intensity at.
