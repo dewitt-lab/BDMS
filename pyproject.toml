@@ -51,6 +51,7 @@ dev = [
   "sphinx-argparse",
   "sphinx-autodoc-typehints",
   "sphinx-copybutton",
+  "sphinx-autoapi",
   "furo",
   "myst-nb",
   "pandoc",

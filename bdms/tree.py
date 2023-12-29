@@ -1,5 +1,4 @@
-r"""Birth-death-mutation-sampling (BDMS) process simulation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+r"""Birth-death-mutation-sampling (BDMS) process simulation.
 
 Example:
 
@@ -24,12 +23,10 @@ Example:
           \-|   \-7
             |
              \-5
-
 """
 
 from __future__ import annotations
 import ete3
-from ete3.coretype.tree import TreeError
 from bdms import mutators, poisson, utils
 import numpy as np
 from typing import Any, Literal, Iterator, Self, Hashable
@@ -38,6 +35,10 @@ import itertools
 from collections import defaultdict
 import copy
 import math
+
+
+class TreeError(ete3.coretype.tree.TreeError):
+    pass
 
 
 class TreeNode(ete3.Tree):

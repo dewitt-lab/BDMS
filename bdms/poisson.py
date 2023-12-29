@@ -1,7 +1,4 @@
-r"""Poisson point processes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Abstract base classes for defining general Poisson point processes on
+r"""Abstract base classes for defining general Poisson point processes on
 :py:class:`bdms.TreeNode` state spaces. Several concrete child classes are included.
 
 These classes are used to define rate-driven processes---such as birth, death, and
@@ -22,7 +19,6 @@ Sample waiting times for each state.
 ...     print(state, poisson_process.waiting_time_rv(state, 0.0, seed=0))
 a 0.6799...
 b 0.3399...
-
 """
 
 from __future__ import annotations

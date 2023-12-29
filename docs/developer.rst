@@ -21,25 +21,24 @@ Run tests::
 
   make test
 
-Run doctests::
+Lint checker::
 
-  make doctest
-
-Test notebooks::
-
-  make notebooks
+  make lint
 
 Format code::
 
   make format
 
-Lint::
-
-  make lint
-
 Build docs locally (you can then see the generated documentation in ``docs/_build/html/index.html``)::
 
   make docs
+
+.. note::
+
+  To render inheritance diagrams in the docs, you'll need to install `Graphviz <https://graphviz.org>`_.
+  We use the Conda package::
+
+    conda install -c conda-forge graphviz
 
 Docs are automatically deployed to github pages via a workflow on push to the main branch.
 

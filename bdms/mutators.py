@@ -1,5 +1,4 @@
-r"""Mutation effects generators
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+r"""Mutation effects generators.
 
 Abstract base class for defining generic mutation effect generators (i.e.
 :math:`\mathcal{p}(x\mid x')`), with arbitrary :py:class:`ete3.TreeNode` attribute
@@ -27,7 +26,6 @@ Example:
     >>> mutator.mutate(node, seed=0)
     >>> node.state
     'c'
-
 """
 
 from __future__ import annotations

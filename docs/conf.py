@@ -32,6 +32,8 @@ release = bdms.__version__
 extensions = [
     # Core Sphinx library for auto html doc generation from docstrings
     "sphinx.ext.autodoc",
+    # support NumPy and Google style docstrings
+    "sphinx.ext.napoleon",
     # Create neat summary tables for modules/classes/methods etc
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
@@ -40,23 +42,50 @@ extensions = [
     "sphinx.ext.mathjax",
     # Add a link to the Python source code for classes, functions etc.
     "sphinx.ext.viewcode",
-    # support NumPy and Google style docstrings
-    "sphinx.ext.napoleon",
     # Automatically document param types (less noise in class signature)
     # NOTE: this disables autodoc_type_aliases used below (i.e.
     #       numpy.typing.ArrayLike are not properly condensed).
     "sphinx_autodoc_typehints",
     # track to do list items
     "sphinx.ext.todo",
-    "sphinxarg.ext",
     # Copy button for code blocks
     "sphinx_copybutton",
-    # render command line output
-    # "sphinxcontrib.programoutput",
     # jupyter notebooks
     "myst_nb",
+    # autoapi
+    "autoapi.extension",
+    "sphinx.ext.graphviz",
+    "sphinx.ext.inheritance_diagram",
 ]
 
+autoapi_dirs = ["../bdms"]
+autoapi_options = [
+    "members",
+    "inherited-members",
+    "undoc-members",
+    "show-inheritance",
+    "show-inheritance-diagram",
+    "show-module-summary",
+    "imported-members",
+]
+autoapi_keep_files = False  # set to True to debug autoapi
+autodoc_typehints = "description"
+templates_path = ["templates"]  # the usual place for custom sphinx templates
+autoapi_template_dir = "templates/autoapi"  # custom autoapi templates
+
+inheritance_graph_attrs = dict(
+    dpi=200, rankdir="LR", size='"6.0, 0.5"', fontsize=14, ratio="compress"
+)
+inheritance_node_attrs = dict(
+    shape="box",
+    fontcolor="white",
+    fontsize=14,
+    height=0.75,
+    color="cornflowerblue",
+    style="filled",
+    fillcolor="cornflowerblue",
+)
+inheritance_edge_attrs = dict(penwidth=2.0, color="cornflowerblue")
 
 # options for myst
 myst_heading_anchors = 3  # auto-generate 3 levels of heading anchors
@@ -79,22 +108,6 @@ intersphinx_mapping = {
 }
 
 napoleon_use_rtype = False  # More compact, e.g. "Returns" vs. "Return type"
-
-autosummary_generate = True  # Turn on sphinx.ext.autosummary
-autoclass_content = "both"  # Add __init__ doc (i.e. params) to class summaries
-html_show_sourcelink = True
-
-autodoc_inherit_docstrings = True  # If no class summary, inherit base class summary
-
-autodoc_default_options = {
-    "members": True,
-    "member-order": "bysource",
-    "show-inheritance": True,
-    # 'special-members': '__init__',
-}
-
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ["templates"]
 
 # -- Options for HTML output -------------------------------------------------
 

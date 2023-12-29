@@ -22,7 +22,7 @@ All code is freely available at `<https://github.com/WSDeWitt/BDMS>`_.
    :maxdepth: 2
    :caption: API Documentation
 
-   api
+   autoapi/bdms/index
 
 .. toctree::
    :maxdepth: 2
