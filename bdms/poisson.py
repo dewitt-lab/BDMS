@@ -212,8 +212,7 @@ class ConstantProcess(HomogeneousProcess):
 
 
 class DiscreteProcess(HomogeneousProcess):
-    r"""A homogeneous process at each of :math:`d` states indexed :math:`i=0, 1, \ldots,
-    d-1`.
+    r"""A homogeneous process at each of :math:`d` states.
 
     Args:
         rates: Rates for each state.

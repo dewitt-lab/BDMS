@@ -18,7 +18,7 @@ format:
 test:
 	pytest
 	pytest --doctest-modules
-	pytest --nbval notebooks
+	pytest --nbval docs/notebooks
 
 docs:
 	make -C docs html

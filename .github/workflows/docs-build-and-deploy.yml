@@ -19,20 +19,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
           cache: pip
-      - name: Install
+
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v1
+
+      - name: Install BDMS
         run: |
           python -m pip install --upgrade pip
           make install-pyqt
+
       - name: Build 🔧
         run: |
           make docs
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

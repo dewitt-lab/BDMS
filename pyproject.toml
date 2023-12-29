@@ -48,7 +48,6 @@ dev = [
   "nbval",
   "pyright",
   "sphinx",
-  "sphinx-argparse",
   "sphinx-autodoc-typehints",
   "sphinx-copybutton",
   "sphinx-autoapi",

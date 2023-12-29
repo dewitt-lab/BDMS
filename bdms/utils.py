@@ -95,7 +95,7 @@ class RandomizedSet:
         self._idx_to_item[del_idx] = last_item
         # Remove the last element
         del self._item_to_idx[item]
-        del self._idx_to_item[len(self) - 1]
+        del self._idx_to_item[-1]
 
     def choice(self, seed: int | np.random.Generator | None = None) -> Hashable:
         r"""Randomly sample an item from the set.

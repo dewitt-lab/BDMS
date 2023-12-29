@@ -32,8 +32,6 @@ release = bdms.__version__
 extensions = [
     # Core Sphinx library for auto html doc generation from docstrings
     "sphinx.ext.autodoc",
-    # support NumPy and Google style docstrings
-    "sphinx.ext.napoleon",
     # Create neat summary tables for modules/classes/methods etc
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
@@ -41,19 +39,22 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     # Add a link to the Python source code for classes, functions etc.
-    "sphinx.ext.viewcode",
+    # NOTE: this is off to avoid a bug in sphinx parsing of ETE3 code.
+    # "sphinx.ext.viewcode",
     # Automatically document param types (less noise in class signature)
     # NOTE: this disables autodoc_type_aliases used below (i.e.
     #       numpy.typing.ArrayLike are not properly condensed).
     "sphinx_autodoc_typehints",
+    # support NumPy and Google style docstrings
+    "sphinx.ext.napoleon",
+    # autoapi
+    "autoapi.extension",
     # track to do list items
     "sphinx.ext.todo",
     # Copy button for code blocks
     "sphinx_copybutton",
     # jupyter notebooks
     "myst_nb",
-    # autoapi
-    "autoapi.extension",
     "sphinx.ext.graphviz",
     "sphinx.ext.inheritance_diagram",
 ]
@@ -62,16 +63,19 @@ autoapi_dirs = ["../bdms"]
 autoapi_options = [
     "members",
     "inherited-members",
-    "undoc-members",
+    # "undoc-members",  # include members without docstrings
     "show-inheritance",
     "show-inheritance-diagram",
     "show-module-summary",
     "imported-members",
 ]
-autoapi_keep_files = False  # set to True to debug autoapi
+autoapi_keep_files = False  # set to True to debug autoapi generated files
 autodoc_typehints = "description"
-templates_path = ["templates"]  # the usual place for custom sphinx templates
-autoapi_template_dir = "templates/autoapi"  # custom autoapi templates
+templates_path = ["_templates"]  # the usual place for custom sphinx templates
+autoapi_template_dir = "_templates/autoapi"  # custom autoapi templates
+
+# remove the autoapi main index page, which we don't use
+autoapi_add_toctree_entry = False
 
 inheritance_graph_attrs = dict(
     dpi=200, rankdir="LR", size='"6.0, 0.5"', fontsize=14, ratio="compress"
