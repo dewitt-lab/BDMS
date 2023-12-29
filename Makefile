@@ -15,6 +15,9 @@ format:
 	black .
 	docformatter --black --in-place **/*.py
 
+typecheck:
+	pyright bdms/*.py
+
 test:
 	pytest
 	pytest --doctest-modules
@@ -23,4 +26,4 @@ test:
 docs:
 	make -C docs html
 
-.PHONY: install lint format test docs
+.PHONY: install lint format typecheck test docs

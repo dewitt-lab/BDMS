@@ -49,12 +49,12 @@ class TestTreeNode(unittest.TestCase):
                     self.tree.get_distance(leaf), mean_root_to_tip_distance, places=5
                 )
 
-    def test_prune(self):
+    def test_prune_unsampled(self):
         self.tree.sample_survivors(n=10)
         original_sampled = set(
             [node for node in self.tree.traverse() if node.event == "sampling"]
         )
-        self.tree.prune()
+        self.tree.prune_unsampled()
         self.assertTrue(all(leaf.event == "sampling" for leaf in self.tree))
         mutation_count = sum(node.event == "mutation" for node in self.tree.traverse())
         self.tree.remove_mutation_events()

@@ -14,7 +14,7 @@ Example:
     Define a discrete mutation model.
 
     >>> mutator = bdms.mutators.DiscreteMutator(
-    ...     state_space=("a", "b", "c"),
+    ...     state_space=["a", "b", "c"],
     ...     transition_matrix=[[0.0, 0.5, 0.5],
     ...                        [0.5, 0.0, 0.5],
     ...                        [0.5, 0.5, 0.0]],
@@ -33,7 +33,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 from collections.abc import Sequence, Callable, Hashable
 import numpy as np
-from scipy.stats import norm, gaussian_kde
+import scipy.stats as stats
 import ete3
 
 # NOTE: sphinx is currently unable to present this in condensed form when the
@@ -111,19 +111,22 @@ class GaussianMutator(Mutator):
         super().__init__(attr=attr)
         self.shift = shift
         self.scale = scale
-        self._distribution = norm(loc=self.shift, scale=self.scale)
+        self._distribution = stats.norm(loc=self.shift, scale=self.scale)
 
     def mutate(
         self,
         node: ete3.TreeNode,
         seed: int | np.random.Generator | None = None,
     ) -> None:
-        new_value = getattr(node, self.attr) + self._distribution.rvs(random_state=seed)
-        setattr(node, self.attr, new_value)
+        current_state = getattr(node, self.attr)
+        Δ = self._distribution.rvs(random_state=seed)  # type: ignore
+        setattr(node, self.attr, current_state + Δ)
 
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
-        Δx = np.asarray(attr2) - np.asarray(attr1)
-        return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
+        Δ = np.asarray(attr2) - np.asarray(attr1)
+        if log:
+            return self._distribution.logpdf(Δ)  # type: ignore
+        return self._distribution.pdf(Δ)  # type: ignore
 
 
 class KdeMutator(Mutator):
@@ -139,28 +142,28 @@ class KdeMutator(Mutator):
 
     def __init__(
         self,
-        data: NDArray[float.float64],
+        data: NDArray[np.float64],
         attr: str = "state",
-        bw_method: str | float | Callable | None = None,
-        weights: NDArray[float.float64] | None = None,
+        bw_method: str | float | Callable[..., float] | None = None,
+        weights: NDArray[np.float64] | None = None,
     ):
         super().__init__(attr=attr)
-        self._distribution = gaussian_kde(data, bw_method, weights)
+        self._distribution = stats.gaussian_kde(data, bw_method, weights)
 
     def mutate(
         self,
         node: ete3.TreeNode,
         seed: int | np.random.Generator | None = None,
     ) -> None:
-        new_value = (
-            getattr(node, self.attr)
-            + self._distribution.resample(size=1, seed=seed)[0, 0]
-        )
-        setattr(node, self.attr, new_value)
+        current_state = getattr(node, self.attr)
+        Δ = self._distribution.resample(size=1, seed=seed)[0, 0]  # type: ignore
+        setattr(node, self.attr, current_state + Δ)
 
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
-        Δx = np.asarray(attr2) - np.asarray(attr1)
-        return self._distribution.logpdf(Δx) if log else self._distribution.pdf(Δx)
+        Δ = np.asarray(attr2) - np.asarray(attr1)
+        if log:
+            return self._distribution.logpdf(Δ)  # type: ignore
+        return self._distribution.pdf(Δ)  # type: ignore
 
 
 class DiscreteMutator(Mutator):
@@ -176,7 +179,7 @@ class DiscreteMutator(Mutator):
     def __init__(
         self,
         state_space: Sequence[Hashable],
-        transition_matrix: NDArray[float.float64],
+        transition_matrix: NDArray[np.float64],
         attr: str = "state",
     ):
         transition_matrix = np.asarray(transition_matrix, dtype=float)
@@ -202,7 +205,10 @@ class DiscreteMutator(Mutator):
 
         super().__init__(attr=attr)
 
-        self.state_space = {state: index for index, state in enumerate(state_space)}
+        self.state_space: dict[Hashable, int] = {
+            state: index for index, state in enumerate(state_space)
+        }
+        """Mapping from state values to their indices in the transition matrix."""
         self.transition_matrix = transition_matrix
 
     def mutate(
@@ -211,12 +217,12 @@ class DiscreteMutator(Mutator):
         seed: int | np.random.Generator | None = None,
     ) -> None:
         rng = np.random.default_rng(seed)
-
-        states = list(self.state_space.keys())
         transition_probs = self.transition_matrix[
             self.state_space[getattr(node, self.attr)], :
         ]
-        new_value = rng.choice(states, p=transition_probs)
+        new_value = rng.choice(  # type: ignore
+            list(self.state_space.keys()), p=transition_probs  # type: ignore
+        )
         setattr(node, self.attr, new_value)
 
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:

@@ -25,9 +25,9 @@ from __future__ import annotations
 from typing import Any, Hashable, TYPE_CHECKING
 from collections.abc import Mapping, Sequence
 from abc import ABC, abstractmethod
-from scipy.integrate import quad
+import scipy.integrate as integrate
 import numpy as np
-from scipy.optimize import root_scalar
+import scipy.optimize as optimize
 
 # imports that are only used for type hints
 if TYPE_CHECKING:
@@ -53,7 +53,7 @@ class Process(ABC):
     def __init__(self, attr: str = "state") -> None:
         self.attr = attr
 
-    def __call__(self, node: bdms.TreeNode) -> float:
+    def __call__(self, node: bdms.TreeNode) -> NDArray[np.float64]:
         r"""Call ``self`` to evaluate the Poisson intensity at a tree node.
 
         Args:
@@ -78,7 +78,7 @@ class Process(ABC):
     #     rescaled intensity measure."""
 
     @abstractmethod
-    def λ(self, x: Hashable, t: float) -> float:
+    def λ(self, x: Hashable, t: float) -> NDArray[np.float64]:
         r"""The Poisson intensity :math:`\lambda(x, t)` for state :math:`x` at time
         :math:`t`.
 
@@ -92,7 +92,7 @@ class Process(ABC):
         """
 
     @abstractmethod
-    def Λ(self, x: Hashable, t: float, Δt: float) -> float:
+    def Λ(self, x: Hashable, t: float, Δt: float) -> NDArray[np.float64]:
         r"""Evaluate the Poisson intensity measure of state :math:`x` and time interval
         :math:`[t, t+Δt)`, defined as.
 
@@ -111,7 +111,7 @@ class Process(ABC):
         """
 
     @abstractmethod
-    def Λ_inv(self, x: Hashable, t: float, τ: float) -> float:
+    def Λ_inv(self, x: Hashable, t: float, τ: float) -> NDArray[np.float64]:
         r"""Evaluate the inverse function wrt :math:`\Delta t` of :py:meth:`Process.Λ`,
         :math:`\Lambda_t^{-1}(x, t, \tau)`, such that :math:`\Lambda_t^{-1}(x, t,
         \Lambda(x, t, t+\Delta t)) = \Delta t`. This is needed for sampling waiting
@@ -133,7 +133,7 @@ class Process(ABC):
         t: float,
         rate_multiplier: float = 1.0,
         seed: int | np.random.Generator | None = None,
-    ) -> float:
+    ) -> NDArray[np.float64]:
         r"""Sample the waiting time :math:`\Delta t` until the first event, given the
         process on state :math:`x` starting at time :math:`t`.
 
@@ -165,7 +165,9 @@ class HomogeneousProcess(Process):
     r"""Abstract base class for homogenous Poisson processes."""
 
     @abstractmethod
-    def λ_homogeneous(self, x: Hashable) -> float:
+    def λ_homogeneous(
+        self, x: Hashable | Sequence[Hashable] | NDArray[Any]
+    ) -> NDArray[np.float64]:
         r"""Evaluate homogeneous Poisson intensity :math:`\lambda(x)` for state
         :math:`x`.
 
@@ -180,19 +182,20 @@ class HomogeneousProcess(Process):
 
     # def __rmul__(self, scaling: float):
 
-    def λ(self, x: Hashable, t: float) -> float:
+    def λ(self, x: Hashable, t: float) -> NDArray[np.float64]:
         return self.λ_homogeneous(x)
 
-    def Λ(self, x: Hashable, t: float, Δt: float) -> float:
+    def Λ(self, x: Hashable, t: float, Δt: float) -> NDArray[np.float64]:
         return self.λ_homogeneous(x) * Δt
 
     # @np.errstate(divide="ignore")
     # NOTE: the above suppresses warnings, but is slow!
     # We instead test for zero.
-    def Λ_inv(self, x: Hashable, t: float, τ: float) -> float:
+    def Λ_inv(self, x: Hashable, t: float, τ: float) -> NDArray[np.float64]:
         rate = self.λ_homogeneous(x)
         if rate == 0:
-            return np.inf
+            return np.inf  # type: ignore
+
         return τ / rate
 
 
@@ -207,7 +210,9 @@ class ConstantProcess(HomogeneousProcess):
         super().__init__()
         self.value = value
 
-    def λ_homogeneous(self, x: Hashable | Sequence[Any] | NDArray[Any]) -> float:
+    def λ_homogeneous(
+        self, x: Hashable | Sequence[Hashable] | NDArray[Any]
+    ) -> NDArray[np.float64]:
         return self.value * np.ones_like(x)
 
 
@@ -227,13 +232,11 @@ class DiscreteProcess(HomogeneousProcess):
         self.rates = rates
 
     def λ_homogeneous(
-        self, x: Hashable | Sequence[Hashable] | np.ndarray[Hashable]
-    ) -> float:
-        if (isinstance(x, Sequence) and not isinstance(x, str)) or isinstance(
-            x, np.ndarray
-        ):
-            return np.array([self.rates[xi] for xi in x])
-        return self.rates[x]
+        self, x: Hashable | Sequence[Hashable] | NDArray[Any]
+    ) -> NDArray[np.float64]:
+        if isinstance(x, Hashable):
+            return self.rates[x]  # type: ignore
+        return np.array([self.rates[xi] for xi in x])  # type: ignore
 
 
 class InhomogeneousProcess(Process):
@@ -263,7 +266,7 @@ class InhomogeneousProcess(Process):
         self.root_kwargs = root_kwargs
 
     @abstractmethod
-    def λ_inhomogeneous(self, x: Hashable, t: float) -> float:
+    def λ_inhomogeneous(self, x: Hashable, t: float) -> NDArray[np.float64]:
         r"""Evaluate inhomogeneous Poisson intensity :math:`\lambda(x, t)` given state
         :math:`x`.
 
@@ -275,20 +278,28 @@ class InhomogeneousProcess(Process):
             The Poisson intensity :math:`\lambda(x, t)`.
         """
 
-    def λ(self, x: Hashable, t: float) -> float:
+    def λ(self, x: Hashable, t: float) -> NDArray[np.float64]:
         return self.λ_inhomogeneous(x, t)
 
-    def Λ(self, x: Hashable, t: float, Δt: float) -> float:
-        return quad(lambda Δt: self.λ(x, t + Δt), 0, Δt, **self.quad_kwargs)[0]
+    def Λ(self, x: Hashable, t: float, Δt: float) -> NDArray[np.float64]:
+        return integrate.quad(
+            lambda Δt: self.λ(x, t + Δt), 0, Δt, **self.quad_kwargs  # type: ignore
+        )[0]
 
-    def Λ_inv(self, x: Hashable, t: float, τ: float) -> float:
+    def Λ_inv(self, x: Hashable, t: float, τ: float) -> NDArray[np.float64]:
         # NOTE: we log transform to ensure non-negative values
-        sol = root_scalar(
-            lambda logΔt: self.Λ(x, t, np.exp(logΔt)) - τ,
-            fprime=lambda logΔt: self.λ(x, t + np.exp(logΔt)) * np.exp(logΔt),
+        def f(logΔt: float):
+            return self.Λ(x, t, np.exp(logΔt)) - τ
+
+        def fprime(logΔt: float):
+            return self.λ(x, t + np.exp(logΔt)) * np.exp(logΔt)
+
+        sol = optimize.root_scalar(  # type: ignore
+            f=f,
+            fprime=fprime,
             x0=np.log(τ / self.λ(x, t)),  # initial guess based on rate at time t
             **self.root_kwargs,
         )
-        if not sol.converged:
+        if not sol.converged:  # type: ignore
             raise RuntimeError(f"Root-finding failed to converge:\n{sol}")
-        return np.exp(sol.root)
+        return np.exp(sol.root)  # type: ignore

@@ -29,6 +29,10 @@ Format code::
 
   make format
 
+Type check::
+
+  make typecheck
+
 Build docs locally (you can then see the generated documentation in ``docs/_build/html/index.html``)::
 
   make docs
