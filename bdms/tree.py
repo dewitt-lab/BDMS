@@ -105,17 +105,17 @@ class TreeNode(ete3.Tree):
         tree."""
 
     def _birth_outcome(
-        self, birth_mutations: bool, mutator: mutators.Mutator, rng: np.random.Generator
+        self, mutation_prob: float, mutator: mutators.Mutator, rng: np.random.Generator
     ) -> Generator[TreeNode, None, None]:
         r"""Generate the outcome of a birth event at this node.
 
         Args:
-            birth_mutations: Flag to indicate whether mutations should occur at birth.
-            mutator: Generator of mutation effects if ``birth_mutations=True``.
+            mutation_prob: Probability of a mutation event for each daughter node.
+            mutator: Generator of mutation effects.
             rng: Random number generator.
 
         Yields:
-            The child nodes, or mutated grandchild nodes if ``birth_mutations=True``.
+            The child nodes, or mutated grandchild nodes.
         """
         assert self.event == self._BIRTH_EVENT
         for _ in range(self._OFFSPRING_NUMBER):
@@ -125,7 +125,7 @@ class TreeNode(ete3.Tree):
                 name=next(self._name_generator),
             )
             setattr(child, mutator.attr, copy.copy(getattr(self, mutator.attr)))
-            if birth_mutations:
+            if mutation_prob and (rng.random() < mutation_prob):
                 child.event = self._MUTATION_EVENT
                 mutator.mutate(child, seed=rng)
                 grandchild = TreeNode(
@@ -172,7 +172,7 @@ class TreeNode(ete3.Tree):
         death_process: poisson.Process = poisson.ConstantProcess(0),
         mutation_process: poisson.Process = poisson.ConstantProcess(0),
         mutator: mutators.Mutator = mutators.DiscreteMutator((None,), np.array([[1]])),
-        birth_mutations: bool = False,
+        birth_mutation_prob: float = 0.0,
         min_survivors: int = 1,
         capacity: int = 1000,
         capacity_method: Literal["birth", "death", "hard"] | None = None,
@@ -188,8 +188,10 @@ class TreeNode(ete3.Tree):
             death_process: Death process function.
             mutation_process: Mutation process function.
             mutator: Generator of mutation effects at mutation events
-                     (and on offspring of birth events if ``birth_mutations=True``).
-            birth_mutations: Flag to indicate whether mutations should occur at birth.
+                     (and possibly on daughters of birth events if
+                     ``birth_mutation_prob > 0``).
+            birth_mutation_prob: Probability of a mutation event for each daughter node
+                                 of a birth event.
             min_survivors: Minimum number of survivors. If the simulation finishes with
                            fewer than this number of survivors, then a
                            :py:class:`TreeError` is raised.
@@ -365,7 +367,9 @@ class TreeNode(ete3.Tree):
                 if event_node.event == self._DEATH_EVENT:
                     new_nodes = ()
                 elif event_node.event == self._BIRTH_EVENT:
-                    new_nodes = event_node._birth_outcome(birth_mutations, mutator, rng)
+                    new_nodes = event_node._birth_outcome(
+                        birth_mutation_prob, mutator, rng
+                    )
                 elif event_node.event == self._MUTATION_EVENT:
                     new_nodes = event_node._mutation_outcome(mutator, rng)
                 else:

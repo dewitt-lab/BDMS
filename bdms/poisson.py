@@ -234,7 +234,7 @@ class DiscreteProcess(HomogeneousProcess):
     def λ_homogeneous(
         self, x: Hashable | Sequence[Hashable] | NDArray[Any]
     ) -> NDArray[np.float64]:
-        if isinstance(x, Hashable):
+        if isinstance(x, Hashable):  # type:ignore
             return self.rates[x]  # type:ignore
         return np.array([self.rates[xi] for xi in x])
 
