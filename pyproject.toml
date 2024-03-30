@@ -9,15 +9,14 @@ build-backend = "hatchling.build"
 [project]
 name = "bdms-sim"
 authors = [
-  { name="Thanasi Bakis", email="abakis@uci.edu" },
-  { name="Michael Celentano", email="mcelentano@berkeley.edu" },
   { name="William DeWitt", email="wsdewitt@gmail.com" },
-  { name="Frederick Matsen", email="ematsen@gmail.com" },
-  { name="Volodymyr Minin", email="yss@berkeley.edu" },
-  { name="Sebastian Prillo", email="sprillo@berkeley.edu" },
+  { name="Michael Celentano", email="mcelentano@berkeley.edu" },
+  { name="Thanasi Bakis", email="abakis@uci.edu" },
   { name="Duncan Ralph", email="dkralph@gmail.com" },
-  { name="Yoonseo Song", email="ysong07@cs.washington.edu" },
+  { name="Sebastian Prillo", email="sprillo@berkeley.edu" },
+  { name="Frederick Matsen", email="ematsen@gmail.com" },
   { name="Yun Song", email="yss@berkeley.edu" },
+  { name="Volodymyr Minin", email="yss@berkeley.edu" },
 ]
 description = "Tree simulator for birth-death-mutation-sampling (BDMS) processes"
 readme = "README.md"
