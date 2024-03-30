@@ -30,7 +30,7 @@ import ete3
 from ete3.coretype.tree import TreeError as ete_TreeError
 from bdms import mutators, poisson, utils
 import numpy as np
-from typing import Any, Literal, Hashable
+from typing import Any, Literal, Hashable, Callable
 from collections.abc import Mapping, Iterator, Generator
 import itertools
 from collections import defaultdict
@@ -105,12 +105,17 @@ class TreeNode(ete3.Tree):
         tree."""
 
     def _birth_outcome(
-        self, mutation_prob: float, mutator: mutators.Mutator, rng: np.random.Generator
+        self,
+        mutation_event_fn: Callable[[Any, np.random.Generator], float],
+        mutator: mutators.Mutator,
+        rng: np.random.Generator,
     ) -> Generator[TreeNode, None, None]:
         r"""Generate the outcome of a birth event at this node.
 
         Args:
-            mutation_prob: Probability of a mutation event for each daughter node.
+            mutation_event_fn: Mutation event sampler for each daughter node. Takes a
+                               node and rng as an argument and returns ``True`` or
+                               ``False``.
             mutator: Generator of mutation effects.
             rng: Random number generator.
 
@@ -125,7 +130,7 @@ class TreeNode(ete3.Tree):
                 name=next(self._name_generator),
             )
             setattr(child, mutator.attr, copy.copy(getattr(self, mutator.attr)))
-            if mutation_prob and (rng.random() < mutation_prob):
+            if mutation_event_fn(child, rng):
                 child.event = self._MUTATION_EVENT
                 mutator.mutate(child, seed=rng)
                 grandchild = TreeNode(
@@ -172,7 +177,7 @@ class TreeNode(ete3.Tree):
         death_process: poisson.Process = poisson.ConstantProcess(0),
         mutation_process: poisson.Process = poisson.ConstantProcess(0),
         mutator: mutators.Mutator = mutators.DiscreteMutator((None,), np.array([[1]])),
-        birth_mutation_prob: float = 0.0,
+        birth_mutation_prob: float | Callable[[Any], float] = 0.0,
         min_survivors: int = 1,
         capacity: int = 1000,
         capacity_method: Literal["birth", "death", "hard"] | None = None,
@@ -191,7 +196,8 @@ class TreeNode(ete3.Tree):
                      (and possibly on daughters of birth events if
                      ``birth_mutation_prob > 0``).
             birth_mutation_prob: Probability of a mutation event for each daughter node
-                                 of a birth event.
+                                 of a birth event. If a callable, then it should take a
+                                 node attribute as an argument and return a probability.
             min_survivors: Minimum number of survivors. If the simulation finishes with
                            fewer than this number of survivors, then a
                            :py:class:`TreeError` is raised.
@@ -264,6 +270,21 @@ class TreeNode(ete3.Tree):
 
             def print_progress(current_time: float, n_nodes_active: int):
                 pass
+
+        if callable(birth_mutation_prob):
+
+            def mutation_event_fn(node: TreeNode, rng: np.random.Generator) -> bool:
+                return rng.random() < birth_mutation_prob(getattr(node, state_attr))
+
+        elif birth_mutation_prob == 0.0:
+
+            def mutation_event_fn(node: TreeNode, rng: np.random.Generator) -> bool:
+                return False
+
+        else:
+
+            def mutation_event_fn(node: TreeNode, rng: np.random.Generator) -> bool:
+                return rng.random() < birth_mutation_prob
 
         current_time = self.t
         end_time = self.t + t
@@ -368,7 +389,7 @@ class TreeNode(ete3.Tree):
                     new_nodes = ()
                 elif event_node.event == self._BIRTH_EVENT:
                     new_nodes = event_node._birth_outcome(
-                        birth_mutation_prob, mutator, rng
+                        mutation_event_fn, mutator, rng
                     )
                 elif event_node.event == self._MUTATION_EVENT:
                     new_nodes = event_node._mutation_outcome(mutator, rng)
