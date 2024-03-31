@@ -205,6 +205,8 @@ class TreeNode(ete3.Tree):
             capacity_method: Method to enforce population carrying capacity. If
                              ``None``, then a :py:class:`TreeError` is raised if
                              the population exceeds the carrying capacity.
+                             If ``"stop"``, then the simulation stops when the
+                             population reaches the carrying capacity.
                              If ``"birth"``, then the birth rate is logistically
                              modulated such that the process is critical when the
                              population is at carrying capacity.
@@ -346,6 +348,9 @@ class TreeNode(ete3.Tree):
                     )
                     total_birth_rate -= birth_process(node_to_die)
                     total_death_rate -= death_process(node_to_die)
+            elif capacity_method == "stop":
+                if len(names_active) >= capacity:
+                    end_time = current_time
             elif capacity_method is None:
                 if len(names_active) > capacity:
                     self._aborted_evolve_cleanup()
