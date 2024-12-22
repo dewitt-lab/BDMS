@@ -80,6 +80,7 @@ extra-dependencies = [
   "sphinx-copybutton",
   "sphinx-book-theme",
   "pandoc",
+  "myst-nb",
 ]
 
 [tool.hatch.envs.default.scripts]
