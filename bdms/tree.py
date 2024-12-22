@@ -1,29 +1,4 @@
-r"""Birth-death-mutation-sampling (BDMS) process simulation.
-
-Example:
-
-    >>> import bdms
-
-    Initialize a tree with a single root node.
-
-    >>> tree = bdms.Tree()
-    >>> print(tree)
-    <BLANKLINE>
-    --0
-
-    Evolve the tree for a one time unit with default parameters.
-
-    >>> tree.evolve(1.0, seed=0)
-    >>> print(tree)
-    <BLANKLINE>
-          /-2
-         |
-    -- /-|      /-6
-         |   /-|
-          \-|   \-7
-            |
-             \-5
-"""
+r"""Core tree simulation classes."""
 
 from __future__ import annotations
 import ete3
@@ -39,6 +14,12 @@ import math
 
 
 class TreeError(ete_TreeError):
+    r"""Exception raised for tree-related errors.
+
+    Args:
+        value: Explanation of the error.
+    """
+
     pass
 
 
@@ -205,15 +186,15 @@ class TreeNode(ete3.Tree):
             capacity_method: Method to enforce population carrying capacity. If
                              ``None``, then a :py:class:`TreeError` is raised if
                              the population exceeds the carrying capacity.
-                             If ``"stop"``, then the simulation stops when the
+                             If ``'stop'``, then the simulation stops when the
                              population reaches the carrying capacity.
-                             If ``"birth"``, then the birth rate is logistically
+                             If ``'birth'``, then the birth rate is logistically
                              modulated such that the process is critical when the
                              population is at carrying capacity.
-                             If ``"death"``, then the death rate is logistically
+                             If ``'death'``, then the death rate is logistically
                              modulated such that the process is critical when the
                              population is at carrying capacity.
-                             If ``"hard"``, then a random individual is chosen to
+                             If ``'hard'``, then a random individual is chosen to
                              die whenever a birth event results in carrying capacity
                              being exceeded.
             init_population: Initial population size.
@@ -630,6 +611,7 @@ class TreeNode(ete3.Tree):
             kwargs["tree_style"].rotation = 90
             kwargs["tree_style"].mode = mode
             kwargs["tree_style"].scale = scale  # type:ignore
+            kwargs["tree_style"].branch_vertical_margin = 2
 
         event_cache: dict[TreeNode, set[str]] = self.get_cached_content(
             store_attr="event", leaves_only=False

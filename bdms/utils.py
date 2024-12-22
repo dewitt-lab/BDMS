@@ -1,4 +1,4 @@
-r"""Miscellaneous utilities needed by the rest of the package."""
+r"""Utilities needed by the rest of the package."""
 
 from __future__ import annotations
 from typing import Any, Hashable, Iterable
