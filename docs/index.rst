@@ -1,7 +1,7 @@
 BDMS documentation
 ###################
 
-BDMS is a package for simulating trees from birth-death-mutation-sampling (BDMS) processes.
+BDMS is a Python package for simulating trees from birth-death-mutation-sampling (BDMS) processes.
 All code is freely available at `<https://github.com/dewitt-lab/BDMS>`_.
 
 .. toctree::
@@ -12,31 +12,31 @@ All code is freely available at `<https://github.com/dewitt-lab/BDMS>`_.
   cite
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Tutorials
-
-   notebooks/quickstart
-   notebooks/performance
-
-.. toctree::
-   :maxdepth: 2
-   :caption: API Documentation
-
-   autoapi/bdms/index
+  :maxdepth: 1
+  :caption: Tutorials
+  
+  notebooks/quickstart
+  notebooks/performance
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Developer Documentation
-
-   developer
-   todo
+  :maxdepth: 2
+  :caption: Public API
+  
+  bdms
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Notes
+  :maxdepth: 1
+  :caption: Developer Documentation
 
-   CHANGELOG
-   faq
+  developer
+  todo
+
+.. toctree::
+  :maxdepth: 1
+  :caption: Notes
+
+  CHANGELOG
+  faq
 
 
 Indices and tables

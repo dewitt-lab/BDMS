@@ -78,9 +78,7 @@ extra-dependencies = [
   "sphinx",
   "sphinx-autodoc-typehints",
   "sphinx-copybutton",
-  "sphinx-autoapi",
-  "furo",
-  "myst-nb",
+  "sphinx-book-theme",
   "pandoc",
 ]
 

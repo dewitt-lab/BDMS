@@ -1,8 +1,6 @@
-r"""Mutation effects generators.
-
-Abstract base class for defining generic mutation effect generators (i.e.
-:math:`\mathcal{p}(x\mid x')`), with arbitrary :py:class:`ete3.TreeNode` attribute
-dependence. Some concrete child classes are included.
+r"""Classes for defining mutation effect generators :math:`\mathcal{p}(x\mid x')`, with
+arbitrary :py:class:`bdms.TreeNode` attribute dependence. An abstract base class and
+several concrete child classes are included.
 
 These classes are used to define mutation effects for simulations with
 :py:class:`bdms.TreeNode.evolve`.
