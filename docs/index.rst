@@ -1,5 +1,5 @@
-BDMS documentation
-###################
+BDMS |version| documentation
+############################
 
 BDMS is a Python package for simulating trees from birth-death-mutation-sampling (BDMS) processes.
 All code is freely available at `<https://github.com/dewitt-lab/BDMS>`_.
