@@ -51,6 +51,8 @@ packages = ["bdms"]
 [tool.hatch.version]
 path = "bdms/__init__.py"
 
+
+
 # this puts hatch envs in a .hatch directory, so vscode can find them
 
 
@@ -102,3 +104,6 @@ format = [
   "black .",
   "docformatter --black --in-place **/*.py",
 ]
+
+[tool.flake8]
+exclude = ".venv,venv"
