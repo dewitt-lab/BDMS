@@ -220,8 +220,7 @@ class DiscreteProcess(HomogeneousProcess):
         super().__init__(attr=attr)
         for rate in rates:
             if rate < 0:
-                raise ValueError("The rate for each state must tbe greater "
-                                 "or equal to zero. ")
+                raise ValueError("The rate for each state must be >= 0")
         self.rates = rates
 
     def λ_homogeneous(
