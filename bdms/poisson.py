@@ -196,6 +196,8 @@ class ConstantProcess(HomogeneousProcess):
     def __init__(self, value: float = 1.0):
         super().__init__()
         self.value = value
+        if self.value < 0:
+            raise ValueError(f"The constant rate must be a non-negative float")
 
     def λ_homogeneous(
         self, x: Hashable | Sequence[Hashable] | NDArray[Any]
@@ -216,6 +218,9 @@ class DiscreteProcess(HomogeneousProcess):
         self, rates: Mapping[Hashable, float] | Sequence[float], attr: str = "state"
     ):
         super().__init__(attr=attr)
+        for rate in rates:
+            if rate < 0:
+                raise ValueError(f"The rate for each state must tbe greater or equal to zero. ")
         self.rates = rates
 
     def λ_homogeneous(
