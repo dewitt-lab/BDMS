@@ -218,9 +218,14 @@ class DiscreteProcess(HomogeneousProcess):
         self, rates: Mapping[Hashable, float] | Sequence[float], attr: str = "state"
     ):
         super().__init__(attr=attr)
-        for rate in rates:
-            if rate < 0:
-                raise ValueError("The rate for each state must be >= 0")
+        if isinstance(rates, Mapping):
+            for rate in rates.values():
+                if rate < 0.0:
+                    raise ValueError("The rate for each state must be >= 0")
+        else:
+            for rate in rates:
+                if rate < 0.0:
+                    raise ValueError("The rate for each state must be >= 0")
         self.rates = rates
 
     def λ_homogeneous(
