@@ -191,10 +191,12 @@ class ConstantProcess(HomogeneousProcess):
 
     Args:
         value: Constant rate.
+        attr: The name of the :py:class:`bdms.TreeNode` attribute to access. This
+              is not used by this process, but is included for downstream compatibility.
     """
 
-    def __init__(self, value: float = 1.0):
-        super().__init__()
+    def __init__(self, value: float = 1.0, attr: str = "state"):
+        super().__init__(attr=attr)
         self.value = value
 
     def λ_homogeneous(
