@@ -200,7 +200,7 @@ class ConstantProcess(HomogeneousProcess):
     def λ_homogeneous(
         self, x: Hashable | Sequence[Hashable] | NDArray[Any]
     ) -> NDArray[np.floating]:
-        return self.value * np.ones_like(x)
+        return self.value * np.ones_like(x, dtype=float)
 
 
 class DiscreteProcess(HomogeneousProcess):
