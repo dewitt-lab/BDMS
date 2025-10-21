@@ -500,8 +500,7 @@ class TreeNode(ete3.Tree):
             return [getattr(self, attr)]
 
         def is_leaf_fn(node: TreeNode):
-            assert node.up is not None
-            return node.t >= t and node.up.t < t
+            return node.up is not None and (node.up.t < t <= node.t)
 
         return [
             (getattr(node, attr) if node.t == t else getattr(node.up, attr))
