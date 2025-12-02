@@ -200,6 +200,8 @@ class DiscreteMutator(Mutator):
                 f"Transition matrix {transition_matrix} is not a valid stochastic"
                 " matrix."
             )
+        if (not len(transition_matrix) == 1) and np.diag(transition_matrix).any():
+            raise ValueError("transition_matrix diagonal must be zero.")
         super().__init__(attr=attr)
         self.state_space = state_space
         self.state_space_idxs: dict[Any, int] = {

@@ -4,7 +4,11 @@ count = True
 max-line-length = 88
 extend-ignore = E203
 exclude =
+    .venv,
+    venv,
     .vscode,
     .conda,
+    .venv,
+    tests.venv/,
     .hatch,
     __pycache__
