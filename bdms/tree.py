@@ -137,24 +137,6 @@ class Tree(ete4.Tree):
             except KeyError:
                 raise AttributeError(name) from None
 
-    def _event_cache(self, leaves_only: bool = True) -> dict[Tree, set[str]]:
-        r"""Map each node in this subtree to the set of events of its descendant leaves
-        (or all its descendant nodes, including itself, if ``leaves_only`` is
-        ``False``).
-
-        This is like :py:meth:`ete4.Tree.get_cached_content
-        <ete4.core.tree.Tree.get_cached_content>` with ``prop="event"``, but uses an
-        iterative traversal, which is faster on large trees and is not limited by
-        recursion depth.
-        """
-        cache: dict[Tree, set[str]] = {}
-        for node in self.traverse("postorder"):
-            events = {node.event} if node.is_leaf or not leaves_only else set()
-            for child in node.children:
-                events.update(cache[child])
-            cache[node] = events
-        return cache
-
     def _birth_outcome(
         self,
         mutation_event_fn: Callable[[Any, np.random.Generator], float],
@@ -590,7 +572,7 @@ class Tree(ete4.Tree):
         if not self._sampled:
             raise ValueError(f"tree has not been sampled below node {self.name}")
 
-        event_cache = self._event_cache()
+        event_cache: dict[Tree, set[str]] = self.get_cached_content(prop="event")
         if self._SAMPLING_EVENT not in event_cache[self]:
             raise TreeError("cannot prune because no leaves were sampled")
 
@@ -684,7 +666,9 @@ class Tree(ete4.Tree):
             kwargs["tree_style"].scale = scale  # type: ignore
             kwargs["tree_style"].branch_vertical_margin = 2
 
-        event_cache = self._event_cache(leaves_only=False)
+        event_cache: dict[Tree, set[str]] = self.get_cached_content(
+            prop="event", leaves_only=False
+        )
         if (not self._pruned) or (not self._mutations_removed):
             for node in self.traverse():  # type: ignore
                 nstyle = NodeStyle()

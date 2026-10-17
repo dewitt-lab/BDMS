@@ -128,20 +128,6 @@ class TestTree(unittest.TestCase):
         self.assertEqual(len(self.tree), n_leaves)
         self.assertFalse(self.tree._pruned)
 
-    def test_deep_tree(self):
-        # deeper than the C stack allows for recursive tree methods
-        tree = bdms.Tree()
-        node = tree
-        for i in range(50_000):
-            node = node.add_child(bdms.Tree(name=i + 1))
-            node.event = "mutation"
-        node.event = "sampling"
-        tree._sampled = True
-        tree.prune_unsampled()
-        tree.remove_mutation_events()
-        self.assertEqual(len(tree.children), 1)
-        self.assertEqual(tree.children[0].n_mutations, 50_000 - 1)
-
 
 if __name__ == "__main__":
     unittest.main()
