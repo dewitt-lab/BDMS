@@ -501,7 +501,7 @@ class Tree(ete4.Tree):
                     leaf.event = self._SAMPLING_EVENT
         else:
             raise ValueError("must specify either n or p")
-        for node in self.traverse():  # type: ignore
+        for node in self.traverse():
             node._sampled = True
 
     # NOTE: this could be generalized to take an ordered array-valued t,
@@ -574,7 +574,7 @@ class Tree(ete4.Tree):
                 prevent_nondicotomic=False,
                 preserve_branch_length=True,
             )
-        for node in self.traverse():  # type: ignore
+        for node in self.traverse():
             node._pruned = True
 
     def remove_mutation_events(self) -> None:
@@ -587,7 +587,7 @@ class Tree(ete4.Tree):
         """
         if not self._pruned:
             raise ValueError(f"tree has not been pruned below node {self.name}")
-        for node in self.traverse(strategy="postorder"):  # type: ignore
+        for node in self.traverse(strategy="postorder"):
             if node.event == self._MUTATION_EVENT:
                 assert len(node.children) == 1
                 node.children[0].n_mutations += 1
@@ -595,10 +595,10 @@ class Tree(ete4.Tree):
                     prevent_nondicotomic=False,
                     preserve_branch_length=True,
                 )
-        for node in self.traverse():  # type: ignore
+        for node in self.traverse():
             node._mutations_removed = True
 
-    def render(  # type: ignore
+    def render(
         self,
         file_name: str,
         color_by: str | None = "state",
@@ -656,7 +656,7 @@ class Tree(ete4.Tree):
             prop="event", leaves_only=False
         )
         if (not self._pruned) or (not self._mutations_removed):
-            for node in self.traverse():  # type: ignore
+            for node in self.traverse():
                 nstyle = NodeStyle()
                 if (
                     self._SURVIVAL_EVENT not in event_cache[node]
@@ -691,7 +691,7 @@ class Tree(ete4.Tree):
                 ftype="Arial",
                 fgcolor="black",
             )
-            for node in self.traverse():  # type: ignore
+            for node in self.traverse():
                 nstyle = NodeStyle()
                 if color_map is not None:
                     assert color_by is not None
