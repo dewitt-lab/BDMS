@@ -308,11 +308,11 @@ class TreeNode(ete3.Tree):
         }
         while len(names_active) > 0:
             if capacity_method == "birth":
-                rate_multipliers[self._BIRTH_EVENT] = (  # type:ignore
+                rate_multipliers[self._BIRTH_EVENT] = (  # type: ignore
                     total_death_rate / total_birth_rate
                 ) ** (len(names_active) / capacity)
             elif capacity_method == "death":
-                rate_multipliers[self._DEATH_EVENT] = (  # type:ignore
+                rate_multipliers[self._DEATH_EVENT] = (  # type: ignore
                     total_birth_rate / total_death_rate
                 ) ** (len(names_active) / capacity)
             elif capacity_method == "hard":
@@ -455,7 +455,7 @@ class TreeNode(ete3.Tree):
         ]
         if n is not None:
             for leaf in rng.choice(
-                surviving_leaves, size=n, replace=False  # type:ignore
+                surviving_leaves, size=n, replace=False  # type: ignore
             ):
                 leaf.event = self._SAMPLING_EVENT
         elif p is not None:
@@ -464,7 +464,7 @@ class TreeNode(ete3.Tree):
                     leaf.event = self._SAMPLING_EVENT
         else:
             raise ValueError("must specify either n or p")
-        for node in self.traverse():  # type:ignore
+        for node in self.traverse():  # type: ignore
             node._sampled = True
 
     # NOTE: this could be generalized to take an ordered array-valued t,
@@ -539,7 +539,7 @@ class TreeNode(ete3.Tree):
                 prevent_nondicotomic=False,
                 preserve_branch_length=True,
             )
-        for node in self.traverse():  # type:ignore
+        for node in self.traverse():  # type: ignore
             node._pruned = True
 
     def remove_mutation_events(self) -> None:
@@ -552,7 +552,7 @@ class TreeNode(ete3.Tree):
         """
         if not self._pruned:
             raise ValueError(f"tree has not been pruned below node {self.name}")
-        for node in self.traverse(strategy="postorder"):  # type:ignore
+        for node in self.traverse(strategy="postorder"):  # type: ignore
             if node.event == self._MUTATION_EVENT:
                 assert len(node.children) == 1
                 node.children[0].n_mutations += 1
@@ -560,10 +560,10 @@ class TreeNode(ete3.Tree):
                     prevent_nondicotomic=False,
                     preserve_branch_length=True,
                 )
-        for node in self.traverse():  # type:ignore
+        for node in self.traverse():  # type: ignore
             node._mutations_removed = True
 
-    def render(  # type:ignore
+    def render(  # type: ignore
         self,
         file_name: str,
         color_by: str | None = "state",
@@ -609,14 +609,14 @@ class TreeNode(ete3.Tree):
             kwargs["tree_style"].show_scale = False
             kwargs["tree_style"].rotation = 90
             kwargs["tree_style"].mode = mode
-            kwargs["tree_style"].scale = scale  # type:ignore
+            kwargs["tree_style"].scale = scale  # type: ignore
             kwargs["tree_style"].branch_vertical_margin = 2
 
         event_cache: dict[TreeNode, set[str]] = self.get_cached_content(
             store_attr="event", leaves_only=False
         )
         if (not self._pruned) or (not self._mutations_removed):
-            for node in self.traverse():  # type:ignore
+            for node in self.traverse():  # type: ignore
                 nstyle = ete3.NodeStyle()
                 if (
                     self._SURVIVAL_EVENT not in event_cache[node]
@@ -645,7 +645,7 @@ class TreeNode(ete3.Tree):
                     nstyle["size"] = 0
                 node.set_style(nstyle)
         else:
-            for node in self.traverse():  # type:ignore
+            for node in self.traverse():  # type: ignore
                 nstyle = ete3.NodeStyle()
                 if color_map is not None:
                     assert color_by is not None

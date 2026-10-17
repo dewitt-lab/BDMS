@@ -123,8 +123,8 @@ class GaussianMutator(Mutator):
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
         Δ = np.asarray(attr2) - np.asarray(attr1)
         if log:
-            return self._distribution.logpdf(Δ)  # type:ignore
-        return self._distribution.pdf(Δ)  # type:ignore
+            return self._distribution.logpdf(Δ)  # type: ignore
+        return self._distribution.pdf(Δ)  # type: ignore
 
 
 class KdeMutator(Mutator):
