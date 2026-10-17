@@ -1,8 +1,8 @@
-r"""Classes for defining Poisson point processes on :py:class:`bdms.TreeNode` state
+r"""Classes for defining Poisson point processes on :py:class:`bdms.Tree` state
 spaces. Several abstract base classes concrete child classes are included.
 
 These classes are used to define rate-driven processes---such as birth, death, and
-mutation---for simulations with :py:class:`bdms.TreeNode.evolve`.
+mutation---for simulations with :py:meth:`bdms.Tree.evolve`.
 
 Example
 -------
@@ -42,18 +42,18 @@ from numpy.typing import NDArray
 
 
 class Process(ABC):
-    r"""Abstract base class for Poisson point processes on :py:class:`bdms.TreeNode`
+    r"""Abstract base class for Poisson point processes on :py:class:`bdms.Tree`
     attributes.
 
     Args:
-        attr: The name of the :py:class:`bdms.TreeNode` attribute to access.
+        attr: The name of the :py:class:`bdms.Tree` attribute to access.
     """
 
     @abstractmethod
     def __init__(self, attr: str = "state") -> None:
         self.attr = attr
 
-    def __call__(self, node: bdms.TreeNode) -> NDArray[np.floating]:
+    def __call__(self, node: bdms.Tree) -> NDArray[np.floating]:
         r"""Call ``self`` to evaluate the Poisson intensity at a tree node.
 
         Args:
@@ -191,7 +191,7 @@ class ConstantProcess(HomogeneousProcess):
 
     Args:
         value: Constant rate.
-        attr: The name of the :py:class:`bdms.TreeNode` attribute to access. This
+        attr: The name of the :py:class:`bdms.Tree` attribute to access. This
               is not used by this process, but is included for downstream compatibility.
     """
 
@@ -210,7 +210,7 @@ class DiscreteProcess(HomogeneousProcess):
 
     Args:
         rates: Rates for each state.
-        attr: The name of the :py:class:`bdms.TreeNode` attribute to access. This
+        attr: The name of the :py:class:`bdms.Tree` attribute to access. This
               should take a discrete set of values.
     """
 
@@ -237,7 +237,7 @@ class InhomogeneousProcess(Process):
     if analytical forms are available.
 
     Args:
-        attr: The name of the :py:class:`bdms.TreeNode` attribute to access.
+        attr: The name of the :py:class:`bdms.Tree` attribute to access.
         quad_kwargs: Quadrature convergence arguments passed to
                      :py:func:`scipy.integrate.quad`.
         root_kwargs: Root-finding convergence arguments passed to

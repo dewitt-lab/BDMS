@@ -3,9 +3,9 @@ import bdms
 import unittest
 
 
-class TestTreeNode(unittest.TestCase):
+class TestTree(unittest.TestCase):
     def setUp(self):
-        self.tree = bdms.TreeNode()
+        self.tree = bdms.Tree()
         self.tree.state = 0.0
         for seed in range(1000):
             try:
@@ -91,9 +91,9 @@ class TestTreeNode(unittest.TestCase):
         newick = self.tree.write(
             props=["t", "event", "state"], parser=1, format_root_node=True
         )
-        tree2 = bdms.TreeNode(newick, parser=1)
+        tree2 = bdms.Tree(newick, parser=1)
         for node, node2 in zip(self.tree.traverse(), tree2.traverse(), strict=True):
-            self.assertIsInstance(node2, bdms.TreeNode)
+            self.assertIsInstance(node2, bdms.Tree)
             self.assertEqual(node.name, node2.name)
             self.assertEqual(node.t, float(node2.t))
             self.assertEqual(str(node.event), node2.event)
@@ -101,7 +101,7 @@ class TestTreeNode(unittest.TestCase):
             self.assertEqual(node2.n_mutations, 0)
 
     def test_attribute_props(self):
-        node = bdms.TreeNode(state=0)
+        node = bdms.Tree(state=0)
         self.assertEqual(node.name, "0")
         self.assertEqual(node.dist, 0)
         self.assertEqual(node.props["state"], 0)
@@ -118,7 +118,7 @@ class TestTreeNode(unittest.TestCase):
         self.tree.sample_survivors(n=10)
         tree2 = self.tree.copy()
         for node, node2 in zip(self.tree.traverse(), tree2.traverse(), strict=True):
-            self.assertIsInstance(node2, bdms.TreeNode)
+            self.assertIsInstance(node2, bdms.Tree)
             self.assertEqual(node.props, node2.props)
             self.assertTrue(node2._sampled)
         # pruning the copy doesn't affect the original
@@ -130,10 +130,10 @@ class TestTreeNode(unittest.TestCase):
 
     def test_deep_tree(self):
         # deeper than the C stack allows for recursive tree methods
-        tree = bdms.TreeNode()
+        tree = bdms.Tree()
         node = tree
         for i in range(50_000):
-            node = node.add_child(bdms.TreeNode(name=i + 1))
+            node = node.add_child(bdms.Tree(name=i + 1))
             node.event = "mutation"
         node.event = "sampling"
         tree._sampled = True
