@@ -22,8 +22,8 @@ b 0.3399...
 """
 
 from __future__ import annotations
-from typing import Any, Hashable, TYPE_CHECKING
-from collections.abc import Mapping, Sequence
+from typing import Any, TYPE_CHECKING
+from collections.abc import Hashable, Mapping, Sequence
 from abc import ABC, abstractmethod
 import scipy.integrate as integrate
 import numpy as np
@@ -202,6 +202,8 @@ class ConstantProcess(HomogeneousProcess):
     def λ_homogeneous(
         self, x: Hashable | Sequence[Hashable] | NDArray[Any]
     ) -> NDArray[np.floating]:
+        if isinstance(x, Hashable):  # type: ignore
+            return float(self.value)  # type: ignore
         return self.value * np.ones_like(x, dtype=float)
 
 

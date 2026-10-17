@@ -112,7 +112,8 @@ class RandomizedSet:
             The sampled item.
         """
         rng = np.random.default_rng(seed)
-        return self._idx_to_item[rng.choice(len(self))]
+        # NOTE: this draws the same index as rng.choice(len(self)), but is faster
+        return self._idx_to_item[rng.integers(len(self))]
 
     def __len__(self) -> int:
         return len(self._idx_to_item)

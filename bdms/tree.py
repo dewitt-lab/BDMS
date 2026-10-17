@@ -321,6 +321,8 @@ class Tree(ete4.Tree):
         state_names_active: defaultdict[str, utils.RandomizedSet] = defaultdict(
             utils.RandomizedSet
         )
+        # total rates are only needed for logistic modulation of rates
+        track_total_rates = capacity_method in ("birth", "death")
         total_birth_rate = 0.0
         total_death_rate = 0.0
         for _ in range(init_population):
@@ -334,8 +336,9 @@ class Tree(ete4.Tree):
             names_nodes_all[start_node.name] = start_node
             names_active.add(start_node.name)
             state_names_active[getattr(start_node, state_attr)].add(start_node.name)
-            total_birth_rate += birth_process(start_node)
-            total_death_rate += death_process(start_node)
+            if track_total_rates:
+                total_birth_rate += birth_process(start_node)
+                total_death_rate += death_process(start_node)
 
         # initialize rate multipliers, which are used to modulate
         # rates in accordance with the carrying capacity
@@ -365,8 +368,6 @@ class Tree(ete4.Tree):
                     state_names_active[getattr(node_to_die, state_attr)].remove(
                         node_to_die.name
                     )
-                    total_birth_rate -= birth_process(node_to_die)
-                    total_death_rate -= death_process(node_to_die)
             elif capacity_method == "stop":
                 if len(names_active) >= capacity:
                     end_time = current_time
@@ -407,8 +408,9 @@ class Tree(ete4.Tree):
                 state_names_active[getattr(event_node, state_attr)].remove(
                     event_node.name
                 )
-                total_birth_rate -= birth_process(event_node)
-                total_death_rate -= death_process(event_node)
+                if track_total_rates:
+                    total_birth_rate -= birth_process(event_node)
+                    total_death_rate -= death_process(event_node)
                 if event_node.event == self._DEATH_EVENT:
                     new_nodes = ()
                 elif event_node.event == self._BIRTH_EVENT:
@@ -423,8 +425,9 @@ class Tree(ete4.Tree):
                     names_nodes_all[new_node.name] = new_node
                     names_active.add(new_node.name)
                     state_names_active[getattr(new_node, state_attr)].add(new_node.name)
-                    total_birth_rate += birth_process(new_node)
-                    total_death_rate += death_process(new_node)
+                    if track_total_rates:
+                        total_birth_rate += birth_process(new_node)
+                        total_death_rate += death_process(new_node)
                 print_progress(float(current_time), len(names_active))
             else:
                 # deal with possible loss of significance
