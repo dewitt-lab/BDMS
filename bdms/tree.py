@@ -27,17 +27,11 @@ class Tree(ete4.Tree):
 
     Subclasses :py:class:`ete4.Tree <ete4.core.tree.Tree>`.
 
-    Node data (such as time :py:attr:`t`, :py:attr:`event`, and the state attribute)
-    are stored in the ETE node properties dictionary ``props``, so they are available
-    to ETE methods such as :py:meth:`ete4.Tree.write <ete4.core.tree.Tree.write>`.
-    They can also be accessed and set as attributes (e.g. ``node.state``). Attributes
-    whose names start with an underscore are not stored in ``props``.
-
     Args:
         t: Time of this node.
         state: State of this node.
         state_attr: Name of the node attribute to store the state in.
-        kwargs: Additional node properties (e.g. ``name`` or ``dist``).
+        kwargs: Additional node attributes (e.g. ``name`` or ``dist``).
     """
 
     _BIRTH_EVENT = "birth"
