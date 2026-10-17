@@ -1,4 +1,5 @@
 import numpy as np
+import ete4
 import bdms
 import unittest
 
@@ -87,18 +88,19 @@ class TestTree(unittest.TestCase):
             )
 
     def test_node_props(self):
-        # node data are ETE props, so they are written to (and read from) newick
+        # node data are ETE props, so they are written to newick
         newick = self.tree.write(
             props=["t", "event", "state"], parser=1, format_root_node=True
         )
-        tree2 = bdms.Tree(newick, parser=1)
+        tree2 = ete4.Tree(newick, parser=1)
         for node, node2 in zip(self.tree.traverse(), tree2.traverse(), strict=True):
-            self.assertIsInstance(node2, bdms.Tree)
             self.assertEqual(node.name, node2.name)
-            self.assertEqual(node.t, float(node2.t))
-            self.assertEqual(str(node.event), node2.event)
-            self.assertEqual(node.state, float(node2.state))
-            self.assertEqual(node2.n_mutations, 0)
+            self.assertEqual(node.t, float(node2.props["t"]))
+            self.assertEqual(str(node.event), node2.props["event"])
+            self.assertEqual(node.state, float(node2.props["state"]))
+        # newick can only be read into a plain ete4.Tree
+        with self.assertRaises(TypeError):
+            bdms.Tree(newick)
 
     def test_attribute_props(self):
         node = bdms.Tree(state=0)

@@ -34,17 +34,10 @@ class Tree(ete4.Tree):
     whose names start with an underscore are not stored in ``props``.
 
     Args:
-        data: Passed to the :py:class:`ete4.Tree <ete4.core.tree.Tree>` initializer
-              (e.g. a newick string or a dictionary of node properties).
-        children: Passed to the :py:class:`ete4.Tree <ete4.core.tree.Tree>`
-                  initializer.
-        parser: Passed to the :py:class:`ete4.Tree <ete4.core.tree.Tree>` initializer.
         t: Time of this node.
         state: State of this node.
         state_attr: Name of the node attribute to store the state in.
         kwargs: Additional node properties (e.g. ``name`` or ``dist``).
-
-    Node properties given in ``data`` take precedence over the keyword arguments.
     """
 
     _BIRTH_EVENT = "birth"
@@ -72,25 +65,24 @@ class Tree(ete4.Tree):
     """Number of mutations on the branch above this node (zero unless the tree has been
     pruned above this node, removing mutation event nodes)."""
 
+    # NOTE: arguments are keyword-only, so that ETE methods that would initialize a
+    #       node from a newick string or props dict (positional arguments to the
+    #       ete4.Tree initializer) raise an error instead of making a malformed node
     def __init__(
         self,
-        data: Any = None,
-        children: list[Tree] | None = None,
-        parser: Any = None,
         *,
         t: float = 0,
         state: Hashable = None,
         state_attr: str = "state",
         **kwargs: Any,
     ) -> None:
-        super().__init__(data, children=children, parser=parser)
+        super().__init__()
         props = self.props
-        if "name" not in kwargs and "name" not in props:
+        if "name" not in kwargs:
             Tree._name_generator = itertools.count()
             kwargs["name"] = next(self._name_generator)
         for key, value in kwargs.items():
-            if key not in props:
-                setattr(self, key, value)
+            setattr(self, key, value)
         props.setdefault("dist", 0.0)
         props.setdefault("t", t)
         props.setdefault(state_attr, state)
