@@ -28,11 +28,14 @@ Example:
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from collections.abc import Sequence, Callable, Hashable
 import numpy as np
 import scipy.stats as stats
-import ete3
+
+# imports that are only used for type hints
+if TYPE_CHECKING:
+    import bdms
 
 # NOTE: sphinx is currently unable to present this in condensed form when the
 #       sphinx_autodoc_typehints extension is enabled
@@ -44,7 +47,7 @@ from numpy.typing import NDArray
 
 class Mutator(ABC):
     r"""Abstract base class for mutators that mutate a specified
-    :py:class:`ete3.TreeNode` node attribute.
+    :py:class:`bdms.TreeNode` node attribute.
 
     Args:
         attr: Node attribute to mutate.
@@ -56,7 +59,7 @@ class Mutator(ABC):
     @abstractmethod
     def mutate(
         self,
-        node: ete3.TreeNode,
+        node: bdms.TreeNode,
         seed: int | np.random.Generator | None = None,
     ) -> None:
         r"""Mutate a :py:class:`bdms.TreeNode` object in place.
@@ -113,7 +116,7 @@ class GaussianMutator(Mutator):
 
     def mutate(
         self,
-        node: ete3.TreeNode,
+        node: bdms.TreeNode,
         seed: int | np.random.Generator | None = None,
     ) -> None:
         current_state = getattr(node, self.attr)
@@ -150,7 +153,7 @@ class KdeMutator(Mutator):
 
     def mutate(
         self,
-        node: ete3.TreeNode,
+        node: bdms.TreeNode,
         seed: int | np.random.Generator | None = None,
     ) -> None:
         current_state = getattr(node, self.attr)
@@ -210,7 +213,7 @@ class DiscreteMutator(Mutator):
 
     def mutate(
         self,
-        node: ete3.TreeNode,
+        node: bdms.TreeNode,
         seed: int | np.random.Generator | None = None,
     ) -> None:
         rng = np.random.default_rng(seed)
