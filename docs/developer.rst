@@ -53,6 +53,9 @@ To bump e.g. the minor version, run::
 
   hatch version minor
 
+The tag of a GitHub release must match this version (e.g. ``v1.0.0`` for version ``1.0.0``).
+Otherwise, the workflow that publishes the release to PyPI fails without publishing it.
+
 Deployment
 ----------
 
