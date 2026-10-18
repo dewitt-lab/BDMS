@@ -181,7 +181,9 @@ class HomogeneousProcess(Process):
     def Λ_inv(self, x: Hashable, t: float, τ: float) -> NDArray[np.floating]:
         rate = self.λ_homogeneous(x)
         if rate == 0:
-            return np.full_like(x, np.inf, dtype=float)
+            # NOTE: not np.full_like(x, np.inf), which has the wrong shape if the state
+            #       is a sequence, such as a tuple
+            return np.asarray(np.inf)
 
         return τ / rate
 
@@ -204,7 +206,10 @@ class ConstantProcess(HomogeneousProcess):
     ) -> NDArray[np.floating]:
         if isinstance(x, Hashable):  # type: ignore
             return float(self.value)  # type: ignore
-        return self.value * np.ones_like(x, dtype=float)
+        # NOTE: one rate per state, so not np.ones_like(x) unless x is an array, since a
+        #       sequence of states may be a sequence of tuples
+        shape = x.shape if isinstance(x, np.ndarray) else len(x)
+        return np.full(shape, float(self.value))
 
 
 class DiscreteProcess(HomogeneousProcess):

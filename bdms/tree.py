@@ -379,21 +379,25 @@ class Tree(ete4.Tree):
                     raise TreeError(f"{capacity=} exceeded at time={current_time}")
             else:
                 raise ValueError(f"{capacity_method=} not recognized")
+            # NOTE: only waiting times are compared, so states need not be orderable
             waiting_time, event, state = min(
                 (
-                    processes[event].waiting_time_rv(
+                    (
+                        processes[event].waiting_time_rv(
+                            state,
+                            current_time,
+                            rate_multiplier=rate_multipliers[event]
+                            * len(state_names_active[state]),
+                            seed=rng,
+                        ),
+                        event,
                         state,
-                        current_time,
-                        rate_multiplier=rate_multipliers[event]
-                        * len(state_names_active[state]),
-                        seed=rng,
-                    ),
-                    event,
-                    state,
-                )
-                for event in processes
-                for state in state_names_active
-                if len(state_names_active[state]) > 0
+                    )
+                    for event in processes
+                    for state in state_names_active
+                    if len(state_names_active[state]) > 0
+                ),
+                key=lambda item: item[0],
             )
             Δt = float(np.minimum(waiting_time, end_time - current_time))
             current_time += Δt

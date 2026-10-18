@@ -1,3 +1,4 @@
+import dataclasses
 import numpy as np
 import ete4
 import bdms
@@ -129,6 +130,46 @@ class TestTree(unittest.TestCase):
         self.assertEqual(len(tree2), 10)
         self.assertEqual(len(self.tree), n_leaves)
         self.assertFalse(self.tree._pruned)
+
+
+class TestStates(unittest.TestCase):
+    def test_tuple_states(self):
+        # the default death and mutation processes have rate zero
+        tree = bdms.Tree(state=("a", 0))
+        tree.evolve(
+            2.0, birth_process=bdms.poisson.DiscreteProcess({("a", 0): 1.0}), seed=0
+        )
+        scalar_tree = bdms.Tree(state="a0")
+        scalar_tree.evolve(
+            2.0, birth_process=bdms.poisson.DiscreteProcess({"a0": 1.0}), seed=0
+        )
+        self.assertEqual(
+            [node.t for node in tree.traverse()],
+            [node.t for node in scalar_tree.traverse()],
+        )
+        states = [("a", 0), ("a", 1), ("b", 0)]
+        rates = bdms.poisson.ConstantProcess(1.0).λ_homogeneous(states)
+        self.assertEqual(rates.shape, (3,))
+
+    def test_unordered_states(self):
+        # states that can't be compared, two of which can't give birth
+        @dataclasses.dataclass(frozen=True)
+        class State:
+            kind: str
+
+        a, b, c = State("a"), State("b"), State("c")
+        tree = bdms.Tree(state=a)
+        tree.evolve(
+            6.0,
+            birth_process=bdms.poisson.DiscreteProcess({a: 0.0, b: 0.0, c: 2.0}),
+            mutation_process=bdms.poisson.ConstantProcess(1.0),
+            mutator=bdms.mutators.DiscreteMutator(
+                (a, b, c), np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
+            ),
+            init_population=3,
+            seed=0,
+        )
+        self.assertTrue(any(node.event == "birth" for node in tree.traverse()))
 
 
 if __name__ == "__main__":
