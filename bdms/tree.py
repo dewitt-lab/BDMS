@@ -433,9 +433,9 @@ class Tree(ete4.Tree):
                 # deal with possible loss of significance
                 if current_time > end_time:
                     # NOTE: math.isclose is much faster than np.isclose
-                    assert math.isclose(
-                        current_time, end_time
-                    ), f"{current_time=}, {end_time=}"
+                    assert math.isclose(current_time, end_time), (
+                        f"{current_time=}, {end_time=}"
+                    )
                     current_time = end_time
                 print_progress(float(current_time), len(names_active))
                 for node_name in reversed(names_active):
