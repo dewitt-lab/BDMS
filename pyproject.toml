@@ -64,8 +64,7 @@ extra-dependencies = [
   "seaborn",
 
   # style
-  "flake8",
-  "black[jupyter]",
+  "ruff",
   "docformatter",
   "pyright",
 
@@ -92,12 +91,19 @@ docs = [
   "make -C docs html",
 ]
 lint = [
-  "flake8 .",
-  "black --check .",
+  "ruff check .",
+  "ruff format --check .",
   "docformatter --black --check **/*.py",
   "pyright bdms/*.py",
 ]
 format = [
-  "black .",
+  "ruff format .",
   "docformatter --black --in-place **/*.py",
 ]
+
+[tool.ruff]
+extend-exclude = [".conda"]
+
+[tool.ruff.lint]
+# the same checks as flake8: pycodestyle (E, W) and pyflakes (F)
+select = ["E", "W", "F"]
