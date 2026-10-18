@@ -16,6 +16,7 @@ All code is freely available at `<https://github.com/dewitt-lab/BDMS>`_.
   :caption: Tutorials
   
   notebooks/quickstart
+  notebooks/hierarchical_states
   notebooks/performance
 
 .. toctree::
