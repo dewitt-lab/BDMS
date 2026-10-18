@@ -199,7 +199,7 @@ class Tree(ete4.Tree):
         birth_mutation_prob: float | Callable[[Any], float] = 0.0,
         min_survivors: int = 1,
         capacity: int = 1000,
-        capacity_method: Literal["birth", "death", "hard"] | None = None,
+        capacity_method: Literal["birth", "death", "hard", "stop"] | None = None,
         init_population: int = 1,
         seed: int | np.random.Generator | None = None,
         verbose: bool = False,
@@ -348,14 +348,18 @@ class Tree(ete4.Tree):
             self._MUTATION_EVENT: 1.0,
         }
         while len(names_active) > 0:
+            # NOTE: if a total rate is zero, every active node has rate zero for that
+            #       event, so its rate multiplier doesn't matter and is left as is
             if capacity_method == "birth":
-                rate_multipliers[self._BIRTH_EVENT] = (  # type: ignore
-                    total_death_rate / total_birth_rate
-                ) ** (len(names_active) / capacity)
+                if total_birth_rate > 0:
+                    rate_multipliers[self._BIRTH_EVENT] = (  # type: ignore
+                        total_death_rate / total_birth_rate
+                    ) ** (len(names_active) / capacity)
             elif capacity_method == "death":
-                rate_multipliers[self._DEATH_EVENT] = (  # type: ignore
-                    total_birth_rate / total_death_rate
-                ) ** (len(names_active) / capacity)
+                if total_death_rate > 0:
+                    rate_multipliers[self._DEATH_EVENT] = (  # type: ignore
+                        total_birth_rate / total_death_rate
+                    ) ** (len(names_active) / capacity)
             elif capacity_method == "hard":
                 if len(names_active) > capacity:
                     node_to_die_name: str = names_active.choice(rng)
