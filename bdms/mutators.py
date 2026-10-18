@@ -1,9 +1,9 @@
 r"""Classes for defining mutation effect generators :math:`\mathcal{p}(x\mid x')`, with
-arbitrary :py:class:`bdms.TreeNode` attribute dependence. An abstract base class and
+arbitrary :py:class:`bdms.Tree` attribute dependence. An abstract base class and
 several concrete child classes are included.
 
 These classes are used to define mutation effects for simulations with
-:py:class:`bdms.TreeNode.evolve`.
+:py:meth:`bdms.Tree.evolve`.
 
 Example:
 
@@ -20,7 +20,7 @@ Example:
 
     Mutate a node.
 
-    >>> node = bdms.TreeNode(state="a")
+    >>> node = bdms.Tree(state="a")
     >>> mutator.mutate(node, seed=0)
     >>> node.state
     'c'
@@ -28,11 +28,14 @@ Example:
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from collections.abc import Sequence, Callable, Hashable
 import numpy as np
 import scipy.stats as stats
-import ete3
+
+# imports that are only used for type hints
+if TYPE_CHECKING:
+    import bdms
 
 # NOTE: sphinx is currently unable to present this in condensed form when the
 #       sphinx_autodoc_typehints extension is enabled
@@ -44,7 +47,7 @@ from numpy.typing import NDArray
 
 class Mutator(ABC):
     r"""Abstract base class for mutators that mutate a specified
-    :py:class:`ete3.TreeNode` node attribute.
+    :py:class:`bdms.Tree` node attribute.
 
     Args:
         attr: Node attribute to mutate.
@@ -56,13 +59,13 @@ class Mutator(ABC):
     @abstractmethod
     def mutate(
         self,
-        node: ete3.TreeNode,
+        node: bdms.Tree,
         seed: int | np.random.Generator | None = None,
     ) -> None:
-        r"""Mutate a :py:class:`bdms.TreeNode` object in place.
+        r"""Mutate a :py:class:`bdms.Tree` object in place.
 
         Args:
-            node: A :py:class:`bdms.TreeNode` to mutate.
+            node: A :py:class:`bdms.Tree` to mutate.
             seed: A seed to initialize the random number generation. If ``None``, then
                   fresh, unpredictable entropy will be pulled from the OS. If an
                   ``int``, then it will be used to derive the initial state. If a
@@ -113,7 +116,7 @@ class GaussianMutator(Mutator):
 
     def mutate(
         self,
-        node: ete3.TreeNode,
+        node: bdms.Tree,
         seed: int | np.random.Generator | None = None,
     ) -> None:
         current_state = getattr(node, self.attr)
@@ -123,8 +126,8 @@ class GaussianMutator(Mutator):
     def prob(self, attr1: float, attr2: float, log: bool = False) -> float:
         Δ = np.asarray(attr2) - np.asarray(attr1)
         if log:
-            return self._distribution.logpdf(Δ)  # type:ignore
-        return self._distribution.pdf(Δ)  # type:ignore
+            return self._distribution.logpdf(Δ)  # type: ignore
+        return self._distribution.pdf(Δ)  # type: ignore
 
 
 class KdeMutator(Mutator):
@@ -150,7 +153,7 @@ class KdeMutator(Mutator):
 
     def mutate(
         self,
-        node: ete3.TreeNode,
+        node: bdms.Tree,
         seed: int | np.random.Generator | None = None,
     ) -> None:
         current_state = getattr(node, self.attr)
@@ -210,7 +213,7 @@ class DiscreteMutator(Mutator):
 
     def mutate(
         self,
-        node: ete3.TreeNode,
+        node: bdms.Tree,
         seed: int | np.random.Generator | None = None,
     ) -> None:
         rng = np.random.default_rng(seed)

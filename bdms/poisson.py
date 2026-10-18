@@ -1,8 +1,8 @@
-r"""Classes for defining Poisson point processes on :py:class:`bdms.TreeNode` state
+r"""Classes for defining Poisson point processes on :py:class:`bdms.Tree` state
 spaces. Several abstract base classes concrete child classes are included.
 
 These classes are used to define rate-driven processes---such as birth, death, and
-mutation---for simulations with :py:class:`bdms.TreeNode.evolve`.
+mutation---for simulations with :py:meth:`bdms.Tree.evolve`.
 
 Example
 -------
@@ -22,8 +22,8 @@ b 0.3399...
 """
 
 from __future__ import annotations
-from typing import Any, Hashable, TYPE_CHECKING
-from collections.abc import Mapping, Sequence
+from typing import Any, TYPE_CHECKING
+from collections.abc import Hashable, Mapping, Sequence
 from abc import ABC, abstractmethod
 import scipy.integrate as integrate
 import numpy as np
@@ -42,18 +42,18 @@ from numpy.typing import NDArray
 
 
 class Process(ABC):
-    r"""Abstract base class for Poisson point processes on :py:class:`bdms.TreeNode`
+    r"""Abstract base class for Poisson point processes on :py:class:`bdms.Tree`
     attributes.
 
     Args:
-        attr: The name of the :py:class:`bdms.TreeNode` attribute to access.
+        attr: The name of the :py:class:`bdms.Tree` attribute to access.
     """
 
     @abstractmethod
     def __init__(self, attr: str = "state") -> None:
         self.attr = attr
 
-    def __call__(self, node: bdms.TreeNode) -> NDArray[np.floating]:
+    def __call__(self, node: bdms.Tree) -> NDArray[np.floating]:
         r"""Call ``self`` to evaluate the Poisson intensity at a tree node.
 
         Args:
@@ -191,7 +191,7 @@ class ConstantProcess(HomogeneousProcess):
 
     Args:
         value: Constant rate.
-        attr: The name of the :py:class:`bdms.TreeNode` attribute to access. This
+        attr: The name of the :py:class:`bdms.Tree` attribute to access. This
               is not used by this process, but is included for downstream compatibility.
     """
 
@@ -202,6 +202,8 @@ class ConstantProcess(HomogeneousProcess):
     def λ_homogeneous(
         self, x: Hashable | Sequence[Hashable] | NDArray[Any]
     ) -> NDArray[np.floating]:
+        if isinstance(x, Hashable):  # type: ignore
+            return float(self.value)  # type: ignore
         return self.value * np.ones_like(x, dtype=float)
 
 
@@ -210,7 +212,7 @@ class DiscreteProcess(HomogeneousProcess):
 
     Args:
         rates: Rates for each state.
-        attr: The name of the :py:class:`bdms.TreeNode` attribute to access. This
+        attr: The name of the :py:class:`bdms.Tree` attribute to access. This
               should take a discrete set of values.
     """
 
@@ -223,8 +225,8 @@ class DiscreteProcess(HomogeneousProcess):
     def λ_homogeneous(
         self, x: Hashable | Sequence[Hashable] | NDArray[Any]
     ) -> NDArray[np.floating]:
-        if isinstance(x, Hashable):  # type:ignore
-            return self.rates[x]  # type:ignore
+        if isinstance(x, Hashable):  # type: ignore
+            return self.rates[x]  # type: ignore
         return np.array([self.rates[xi] for xi in x])
 
 
@@ -237,7 +239,7 @@ class InhomogeneousProcess(Process):
     if analytical forms are available.
 
     Args:
-        attr: The name of the :py:class:`bdms.TreeNode` attribute to access.
+        attr: The name of the :py:class:`bdms.Tree` attribute to access.
         quad_kwargs: Quadrature convergence arguments passed to
                      :py:func:`scipy.integrate.quad`.
         root_kwargs: Root-finding convergence arguments passed to

@@ -9,7 +9,6 @@ Classes
 .. autosummary::
     :recursive:
 
-    TreeNode
     Tree
 
 
@@ -28,7 +27,6 @@ Modules
   :maxdepth: 1
   :hidden:
 
-  bdms.TreeNode
   bdms.Tree
   bdms.poisson
   bdms.mutators

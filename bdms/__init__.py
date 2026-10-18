@@ -1,7 +1,6 @@
-__version__ = "0.6.2"
+__version__ = "1.0.0"
 
-from .tree import TreeNode as _TreeNode, TreeError as _TreeError
+from .tree import Tree as _Tree, TreeError as _TreeError
 
-TreeNode = _TreeNode
-Tree = _TreeNode
+Tree = _Tree
 TreeError = _TreeError

@@ -31,8 +31,7 @@ dependencies = [
   "matplotlib",
   "numpy",
   "scipy",
-  "ete3",
-  "pyqt5",
+  "ete4[treeview]>=4.4",
 ]
 
 [project.urls]
