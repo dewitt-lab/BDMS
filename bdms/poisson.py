@@ -127,7 +127,8 @@ class Process(ABC):
         Args:
             x: State.
             t: Time at which to start waiting.
-            rate_multiplier: A constant by which to multiply the Poisson intensity
+            rate_multiplier: A constant by which to multiply the Poisson intensity. If
+                             zero, the waiting time is infinite.
             seed: A seed to initialize the random number generation. If ``None``, then
                   fresh, unpredictable entropy will be pulled from the OS. If an
                   ``int``, then it will be used to derive the initial state. If a
@@ -137,7 +138,9 @@ class Process(ABC):
             Waiting time :math:`\Delta t`.
         """
         rng = np.random.default_rng(seed)
-        return self.Λ_inv(x, t, rng.exponential(scale=1 / rate_multiplier))
+        # a zero rate multiplier means the event can't happen
+        scale = np.inf if rate_multiplier == 0 else 1 / rate_multiplier
+        return self.Λ_inv(x, t, rng.exponential(scale=scale))
 
     def __repr__(self) -> str:
         keyval_strs = (
